@@ -8,12 +8,12 @@ namespace Lab4.Task_3
 {
     class RadixSort
     {
-        public string[] _text;
+        public string[] Text;
 
         public RadixSort(string text) 
         { 
-            _text = text.ToLower().Split(" ");
-            Sort(0, _text.Length - 1, 0);
+            Text = text.ToLower().Split(" ");
+            Sort(0, Text.Length - 1, 0);
         }
 
         private static int CharAt(string str, int index)
@@ -43,7 +43,7 @@ namespace Lab4.Task_3
             for (int i = startIndex; i <= endIndex; i++)
             {
                 // Получаем символ в текущем разряде и увеличиваем его счетчик
-                int c = CharAt(_text[i], currentIndex);
+                int c = CharAt(Text[i], currentIndex);
                 count[c + 2]++;
             }
 
@@ -56,14 +56,14 @@ namespace Lab4.Task_3
             for (int i = startIndex; i <= endIndex; i++)
             {
                 // Определяем символ в текущем разряде
-                int c = CharAt(_text[i], currentIndex);
-                temp.Add(count[c + 1]++, _text[i]);
+                int c = CharAt(Text[i], currentIndex);
+                temp.Add(count[c + 1]++, Text[i]);
             }
 
             // Переносим отсортированные строки из временной структуры обратно в оригинальный массив
             for (int i = startIndex; i <= endIndex; i++)
             {
-                _text[i] = temp[i - startIndex];
+                Text[i] = temp[i - startIndex];
             }
 
             // Рекурсивно сортируем каждую категорию символов, чтобы отсортировать по следующему разряду
@@ -74,11 +74,11 @@ namespace Lab4.Task_3
         }
 
         // Вывод отсортированного массива
-        public void print()
+        public void Print()
         { 
-            for (int i = 0; i < _text.Length; i++)
+            for (int i = 0; i < Text.Length; i++)
             {
-                Console.Write(_text[i] + " ");
+                Console.Write(Text[i] + " ");
             }
         }
     }

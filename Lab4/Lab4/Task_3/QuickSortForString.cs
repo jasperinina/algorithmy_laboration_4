@@ -8,12 +8,12 @@ namespace Lab4.Task_3
 {
     class QuickSortForString
     {
-        public string[] _text;
+        public string[] Text;
 
         public QuickSortForString(string text)
         {
-            _text = text.ToLower().Split(" ");
-            Sort(_text, 0, _text.Length - 1);
+            Text = text.ToLower().Split(" ");
+            Sort(Text, 0, Text.Length - 1);
         }
 
         public void Sort(string[] arr, int low, int high)
@@ -58,11 +58,11 @@ namespace Lab4.Task_3
             return i + 1;
         }
 
-        public void print()
+        public void Print()
         {
-            for (int i = 0; i < _text.Length; i++)
+            for (int i = 0; i < Text.Length; i++)
             {
-                Console.Write(_text[i] + " ");
+                Console.Write(Text[i] + " ");
             }
         }
     }
