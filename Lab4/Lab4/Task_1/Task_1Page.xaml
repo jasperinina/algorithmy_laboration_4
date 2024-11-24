@@ -5,8 +5,21 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Lab4.Task_1"
       mc:Ignorable="d"
-      Title="Task_1Page" Height="450" Width="800">
+      Title="Task_1Page" Height="450" Width="800" Loaded="Window_Loaded">
     <Grid>
-        
+        <Canvas x:Name="Canvas" Background="White" Margin="98,38,98,99"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
+            <ComboBox x:Name="SortingAlgorithmComboBox" SelectionChanged="SortingAlgorithmComboBox_SelectionChanged" Margin="5">
+                <ComboBoxItem Content="Bubble Sort" Tag="BubbleSort"/>
+                <ComboBoxItem Content="Selection Sort" Tag="SelectionSort"/>
+                <ComboBoxItem Content="Quick Sort" Tag="QuickSort"/>
+                <ComboBoxItem Content="Heap Sort" Tag="HeapSort"/>
+            </ComboBox>
+            <Button x:Name="StartButton" Content="Старт" Click="StartButton_Click" Margin="5"/>
+            <Button x:Name="StopButton" Content="Стоп" Click="StopButton_Click" Margin="5"/>
+            <Button x:Name="NextButton" Content="Следующий шаг" Click="NextButton_Click" Margin="5"/>
+            <Button x:Name="BackButton" Content="Шаг назад" Click="BackButton_Click" Margin="5"/>
+            <Button x:Name="ResetButton" Content="Сбросить" Click="ResetButton_Click" Margin="5"/>
+        </StackPanel>
     </Grid>
 </Page>
