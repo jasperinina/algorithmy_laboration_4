@@ -8,11 +8,12 @@ namespace Lab4.Task_2;
 public partial class Task_2Page : Page
 {
     private MainWindow _mainWindow;
-    private StackPanel dynamicPanel; 
+    private StackPanel dynamicPanel;
     private ComboBox sortMethodComboBox;
     private TextBox inputFilePathTextBox;
     private ComboBox sortAttributeComboBox; // Основной атрибут
     private ComboBox secondaryAttributeComboBox; // Вторичный атрибут
+    private ComboBox valuesComboBox; // Уникальные значения основного атрибута
 
     public Task_2Page(MainWindow mainWindow)
     {
@@ -89,6 +90,23 @@ public partial class Task_2Page : Page
             HorizontalAlignment = HorizontalAlignment.Left,
             Style = (Style)_mainWindow.FindResource("PopUp")
         };
+        sortAttributeComboBox.SelectionChanged += SortAttributeComboBox_SelectionChanged;
+
+        TextBlock valuesTextBlock = new TextBlock
+        {
+            Text = "Выберите значение основного атрибута",
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Style = (Style)_mainWindow.FindResource("TextBlockStyle"),
+            Margin = new Thickness(0, 20, 0, 0)
+        };
+
+        valuesComboBox = new ComboBox
+        {
+            Width = 360,
+            Margin = new Thickness(0, 8, 0, 30),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Style = (Style)_mainWindow.FindResource("PopUp")
+        };
 
         TextBlock secondaryAttributeHeader = new TextBlock
         {
@@ -123,6 +141,8 @@ public partial class Task_2Page : Page
         dynamicPanel.Children.Add(browseFileButton);
         dynamicPanel.Children.Add(sortAttributeHeader);
         dynamicPanel.Children.Add(sortAttributeComboBox);
+        dynamicPanel.Children.Add(valuesTextBlock);
+        dynamicPanel.Children.Add(valuesComboBox);
         dynamicPanel.Children.Add(secondaryAttributeHeader);
         dynamicPanel.Children.Add(secondaryAttributeComboBox);
         dynamicPanel.Children.Add(executeButton);
@@ -143,134 +163,139 @@ public partial class Task_2Page : Page
 
             try
             {
-                var firstLine = File.ReadLines(openFileDialog.FileName).First();
-                var attributes = firstLine.Split(',');
+                var lines = File.ReadAllLines(openFileDialog.FileName);
+
+                if (lines.Length < 2)
+                {
+                    MessageBox.Show("Файл должен содержать заголовок и хотя бы одну строку данных.", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
+                var data = lines.Skip(1).Select(line => line.Split(',').Select(col => col.Trim()).ToArray()).ToList();
+
+                // Выводим только те столбцы, которые имеют дубликаты (если это необходимо)
+                var columnsWithDuplicates = headers.Where((header, i) =>
+                    data.Select(row => row[i]).Distinct().Count() < data.Count).ToList();
 
                 sortAttributeComboBox.Items.Clear();
-                secondaryAttributeComboBox.Items.Clear();
-
-                foreach (var attribute in attributes)
+                foreach (var column in columnsWithDuplicates)
                 {
-                    sortAttributeComboBox.Items.Add(attribute.Trim());
-                    secondaryAttributeComboBox.Items.Add(attribute.Trim());
+                    sortAttributeComboBox.Items.Add(column);
                 }
 
                 if (sortAttributeComboBox.Items.Count > 0)
                 {
                     sortAttributeComboBox.SelectedIndex = 0;
+                    UpdateValuesComboBox(data, headers, sortAttributeComboBox.SelectedItem.ToString());
                 }
-                if (secondaryAttributeComboBox.Items.Count > 0)
-                {
-                    secondaryAttributeComboBox.SelectedIndex = 1;
-                }
+
+                // Фильтрация строк, которые не содержат основной атрибут будет выполняться при сортировке
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
     }
 
-    private void ExecuteSortButton_Click()
-{
-    try
+    private void SortAttributeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var sortMethod = sortMethodComboBox.SelectedItem.ToString();
-        var inputFilePath = inputFilePathTextBox.Text;
-        var primarySortAttribute = sortAttributeComboBox.SelectedItem.ToString();
-        var secondarySortAttribute = secondaryAttributeComboBox.SelectedItem.ToString();
-
-        // Читаем заголовок файла
-        var firstLine = File.ReadLines(inputFilePath).FirstOrDefault();
-
-        if (string.IsNullOrWhiteSpace(firstLine))
-        {
-            MessageBox.Show("Файл не содержит заголовков или пуст.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        if (sortAttributeComboBox.SelectedItem == null || inputFilePathTextBox.Text == string.Empty)
             return;
-        }
 
-        var headers = firstLine.Split(',');
+        var selectedAttribute = sortAttributeComboBox.SelectedItem.ToString();
+        var headers = File.ReadLines(inputFilePathTextBox.Text).First().Split(',').Select(h => h.Trim()).ToArray();
+        var data = File.ReadAllLines(inputFilePathTextBox.Text).Skip(1)
+            .Select(line => line.Split(',').Select(col => col.Trim()).ToArray()).ToList();
 
-        if (headers.Length == 0)
-        {
-            MessageBox.Show("Не удалось определить заголовки из файла.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        UpdateSecondaryComboBox(headers);
+        UpdateValuesComboBox(data, headers, selectedAttribute);
+    }
+
+    private void UpdateValuesComboBox(List<string[]> data, string[] headers, string selectedAttribute)
+    {
+        int columnIndex = Array.IndexOf(headers, selectedAttribute);
+
+        if (columnIndex == -1)
             return;
-        }
 
-        var primaryKeyIndex = Array.IndexOf(headers, primarySortAttribute);
-        var secondaryKeyIndex = Array.IndexOf(headers, secondarySortAttribute);
+        var uniqueValues = data.Select(row => row[columnIndex]).Distinct().ToList();
+        valuesComboBox.ItemsSource = uniqueValues;
+    }
 
-        if (primaryKeyIndex == -1)
-        {
-            MessageBox.Show($"Атрибут {primarySortAttribute} не найден в заголовке файла.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+    private void UpdateSecondaryComboBox(string[] headers)
+    {
+        if (sortAttributeComboBox.SelectedItem == null)
             return;
-        }
 
-        if (secondaryKeyIndex == -1)
+        var primaryAttribute = sortAttributeComboBox.SelectedItem.ToString();
+        secondaryAttributeComboBox.Items.Clear();
+
+        foreach (var header in headers)
         {
-            MessageBox.Show($"Атрибут {secondarySortAttribute} не найден в заголовке файла.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
-        }
-
-        // Проверяем данные файла
-        foreach (var line in File.ReadLines(inputFilePath).Skip(1))
-        {
-            var columns = line.Split(',');
-
-            if (columns.Length < headers.Length)
+            if (header != primaryAttribute)
             {
-                MessageBox.Show($"Ошибка в строке данных: {line}. Ожидается не менее {headers.Length} колонок.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                secondaryAttributeComboBox.Items.Add(header);
+            }
+        }
+
+        if (secondaryAttributeComboBox.Items.Count > 0)
+        {
+            secondaryAttributeComboBox.SelectedIndex = 0;
+        }
+    }
+
+    private async void ExecuteSortButton_Click()
+    {
+        try
+        {
+            var sortMethod = sortMethodComboBox.SelectedItem.ToString();
+            var inputFilePath = inputFilePathTextBox.Text;
+            var primarySortAttribute = sortAttributeComboBox.SelectedItem.ToString();
+
+            var headers = File.ReadLines(inputFilePath).First().Split(',');
+
+            var primaryKeyIndex = Array.IndexOf(headers, primarySortAttribute);
+
+            if (primaryKeyIndex == -1)
+            {
+                MessageBox.Show($"Атрибут {primarySortAttribute} не найден в заголовке файла.", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-        }
 
-        var fileHandler = new FileHandler(inputFilePath, "output.txt");
-        var sorter = new ExternalSorter(fileHandler);
-        var stepDescription = new SortingStepDescription();
+            var fileHandler = new FileHandler(inputFilePath, "output.txt");
+            var sorter = new ExternalSorter(fileHandler);
 
-        sorter.Sort(sortMethod, primaryKeyIndex, secondaryKeyIndex,
-            step =>
+            // Очистите OutputTextBox перед началом сортировки
+            OutputTextBox.Clear();
+
+            // Запуск сортировки в отдельном потоке, чтобы не блокировать UI
+            await Task.Run(() =>
             {
-                // Получаем значения для элемента 1
-                var element1 = step.First(); // Пример, замените First() на фактическую логику
-                var primaryKeyValue1 = "Значение основного ключа для элемента 1"; // Замените на реальное значение
-                var secondaryKeyValue1 = "Значение вторичного ключа для элемента 1"; // Замените на реальное значение
+                sorter.Sort(sortMethod, primaryKeyIndex,
+                    description =>
+                    {
+                        Dispatcher.Invoke(() => UpdateVisualization(description));
+                    },
+                    delay: 1000);
+            });
 
-                // Получаем значения для элемента 2
-                var element2 = step.Last(); // Пример, замените Last() на фактическую логику
-                var primaryKeyValue2 = "Значение основного ключа для элемента 2"; // Замените на реальное значение
-                var secondaryKeyValue2 = "Значение вторичного ключа для элемента 2"; // Замените на реальное значение
-
-                var description = stepDescription.GetStepDescription(
-                    step, 
-                    element1, 
-                    element2, 
-                    primaryKeyValue1, 
-                    primaryKeyValue2, 
-                    secondaryKeyValue1, 
-                    secondaryKeyValue2, 
-                    "Операция"
-                );
-
-                Dispatcher.Invoke(() => UpdateVisualization(step, description));
-            },
-            delay: 1000);
-
-
-        MessageBox.Show("Сортировка завершена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Сортировка завершена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
-    catch (Exception ex)
+
+    private void UpdateVisualization(string description)
     {
-        MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        OutputTextBox.AppendText($"{description}{Environment.NewLine}{Environment.NewLine}");
+        OutputTextBox.ScrollToEnd(); // Автоматическая прокрутка вниз
     }
-}
 
-
-    private void UpdateVisualization(List<string> step, string description)
-    {
-        OutputTextBox.Text += $"{description}{Environment.NewLine}";
-        OutputTextBox.Text += "Текущие данные:" + Environment.NewLine;
-        OutputTextBox.Text += string.Join(Environment.NewLine, step) + Environment.NewLine;
-        OutputTextBox.Text += new string('-', 50) + Environment.NewLine;
-    }
 }
