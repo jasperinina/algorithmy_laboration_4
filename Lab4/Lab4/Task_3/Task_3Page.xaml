@@ -6,7 +6,24 @@
       xmlns:local="clr-namespace:Lab4.Task_3"
       mc:Ignorable="d"
       Title="Task_2Page" Height="450" Width="800">
-    <Grid>
-        
+    <Grid Background="White">
+        <Button x:Name="btForCountWordsForGeneratedText"  Content="Подсчет слов сгенерированного текста" HorizontalAlignment="Left" Margin="29,164,0,0" VerticalAlignment="Top" Height="39" Width="233" Click="btForCountWordsForGeneratedText_Click"/>
+        <Button x:Name="btForTest" Content="Замеры времени" HorizontalAlignment="Left" Margin="29,228,0,0" VerticalAlignment="Top" Height="44" Width="113" Click="btForTest_Click"/>
+        <Button x:Name="btForCountWordsForDoc" Content="Подсчет слов существующего текста" HorizontalAlignment="Left" Margin="29,294,0,0" VerticalAlignment="Top" Width="233" Height="40" Click="btForCountWordsForDoc_Click"/>
+        <TextBox x:Name="tBoxForLengthWords" HorizontalAlignment="Left" Margin="29,90,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="182" Height="42"/>
+
+        <ScrollViewer HorizontalAlignment="Left" Height="133" Margin="452,24,0,0" VerticalAlignment="Top" Width="243">
+            <TextBox x:Name="tBoxForCountWords" Text="" IsReadOnly="True"/>
+        </ScrollViewer>
+
+        <ListView Name="DataListView" Width="349" Height="250" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,57,16">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Количество слов" DisplayMemberBinding="{Binding WordCount}" Width="120"/>
+                    <GridViewColumn Header="QuickSort" DisplayMemberBinding="{Binding QuickSort}" Width="120"/>
+                    <GridViewColumn Header="RadixSort" DisplayMemberBinding="{Binding RadixSort}" Width="120"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
 </Page>
