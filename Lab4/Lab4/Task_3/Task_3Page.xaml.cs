@@ -15,7 +15,7 @@ public partial class Task_3Page : Page
         InitializeComponent();
     }
 
-    private static double[,] E()
+    private static double[,] GetExecutionTimes()
     {
         int[] sizeText = { 100, 500, 1000, 2000, 5000, 7000, 10000, 15000, 20000 };
         double[,] result = new double[sizeText.Length, 3];
@@ -49,7 +49,7 @@ public partial class Task_3Page : Page
     // Замеры времени для таблицы
     private void btForTest_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        double[,] data = E();
+        double[,] data = GetExecutionTimes();
         List<DataItem> items = new List<DataItem>();
         for (int i = 0; i < data.GetLength(0); i++)
         {
