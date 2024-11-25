@@ -46,12 +46,12 @@ namespace Lab4.Task_1.Sorting_Algorithms
             if (largest != i)
             {
                 (array[i], array[largest]) = (array[largest], array[i]);
-                sortSteps.Add((i, largest, true));
+                sortSteps.Add((largest, i, true));
                 Heapify(array, n, largest, sortSteps);
             }
             else
             {
-                sortSteps.Add((i, largest, false));
+                sortSteps.Add((largest, i, false));
             }
         }
     }

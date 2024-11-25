@@ -174,6 +174,7 @@ public partial class Task_1Page : Page
             int index2 = rectangles.IndexOf(shape2);
             (rectangles[index1], rectangles[index2]) = (rectangles[index2], rectangles[index1]);
             LogTextBox.Text += $"Сравниваем {height1} и {height2}, {height1} > {height2} Меняем местами\n";
+            LogTextBox.ScrollToEnd();
         }
         else
         {
@@ -188,6 +189,7 @@ public partial class Task_1Page : Page
             shape1.Fill = Brushes.Blue;
             shape2.Fill = Brushes.Blue;
             LogTextBox.Text += $"Сравниваем {height1} и {height2}, {height1} < {height2} Остаются на местах\n";
+            LogTextBox.ScrollToEnd();
         }
     }
     private async Task Animate(Rectangle shape1, Rectangle shape2, double targetX1, double targetX2)
