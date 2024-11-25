@@ -9,66 +9,94 @@ namespace Lab4.Task_2
     {
         private readonly FileHandler _fileHandler;
         private int _stepNumber; // Глобальный счетчик шагов
-        
+
         public ExternalSorter(FileHandler fileHandler)
         {
             _fileHandler = fileHandler;
             _stepNumber = 0;
         }
-        
-        public void Sort(string sortMethod, int primaryKeyIndex, Action<string> visualizeStep, int delay)
-        {
-            var lines = _fileHandler.ReadFromFile();
-
-            if (lines == null || lines.Count == 0)
-            {
-                visualizeStep("Файл пуст.");
-                return;
-            }
-
-            var headers = lines[0]; // Первая строка — заголовок
-            var allColumns = headers.Split(',').Select(h => h.Trim()).ToArray();
-
-            // Фильтруем строки, у которых количество столбцов больше индекса основного атрибута
-            var data = lines.Skip(1)
-                            .Where(line => line.Split(',').Length > primaryKeyIndex)
-                            .ToList();
-
-            if (data.Count == 0)
-            {
-                visualizeStep("Нет данных для сортировки после фильтрации.");
-                return;
-            }
-
-            _stepNumber = 0; // Сброс счетчика шагов
-
-            List<string> sortedData = sortMethod switch
-            {
-                "Прямое слияние" => DirectMergeSort(data, primaryKeyIndex, visualizeStep, delay),
-                "Естественное слияние" => NaturalMergeSort(data, primaryKeyIndex, visualizeStep, delay),
-                "Многопутевое слияние" => MultiwayMergeSort(data, primaryKeyIndex, visualizeStep, delay),
-                _ => throw new NotImplementedException("Выбранный метод сортировки не поддерживается.")
-            };
-
-            // Записываем результат в файл
-            var sortedLines = new List<string> { headers }.Concat(sortedData).ToList();
-            _fileHandler.WriteToFile(sortedLines);
-        }
 
         /// <summary>
-        /// Реализация прямого слияния (Direct Merge Sort).
+        /// Выполняет сортировку данных.
         /// </summary>
-        private List<string> DirectMergeSort(
-            List<string> data,
-            int primaryKeyIndex,
-            Action<string> visualizeStep,
+        /// <param name="sortMethod">Метод сортировки.</param>
+        /// <param name="filterKeyIndex">Индекс атрибута фильтрации.</param>
+        /// <param name="filterKeyValue">Значение для фильтрации.</param>
+        /// <param name="secondaryKeyIndex">Индекс вторичного атрибута сортировки.</param>
+        /// <param name="progress">Объект IProgress для отчетов о прогрессе.</param>
+        /// <param name="delay">Задержка между шагами в миллисекундах.</param>
+        public void Sort(
+            string sortMethod,
+            int filterKeyIndex,
+            string filterKeyValue,
+            int secondaryKeyIndex,
+            IProgress<string> progress,
             int delay)
         {
-            var sortedBlocks = SplitIntoSortedBlocks(data, primaryKeyIndex);
+            // Чтение данных из файла
+            var data = _fileHandler.ReadFromFile();
 
+            if (data == null || data.Count == 0)
+            {
+                progress?.Report("Файл пуст.");
+                return;
+            }
+
+            var headers = data[0]; // Первая строка — заголовок
+            var allColumns = headers.Split(',').Select(h => h.Trim()).ToArray();
+
+            // Фильтрация строк, которые содержат значение атрибута фильтрации
+            var filteredData = data.Skip(1).Where(line => GetKey(line, filterKeyIndex) == filterKeyValue).ToList();
+
+            // Отправка сообщения о фильтрации
+            progress?.Report($"Оставляем элементы с выбранным ключем \"{filterKeyValue}\".");
+            progress?.Report($"Фильтрованные данные:\n{string.Join("\n", filteredData)}\n");
+
+            if (filteredData.Count == 0)
+            {
+                progress?.Report($"Нет данных для сортировки по значению \"{filterKeyValue}\".");
+                return;
+            }
+
+            // Получение названия вторичного ключа
+            var secondaryKeyName = allColumns[secondaryKeyIndex];
+
+            // Выполнение выбранного метода сортировки
+            List<string> sortedData = sortMethod switch
+            {
+                "Прямое слияние" => DirectMergeSort(filteredData, secondaryKeyIndex, secondaryKeyName, progress, delay),
+                "Естественное слияние" => NaturalMergeSort(filteredData, secondaryKeyIndex, secondaryKeyName, progress, delay),
+                "Многопутевое слияние" => MultiwayMergeSort(filteredData, secondaryKeyIndex, secondaryKeyName, progress, delay),
+                _ => throw new NotSupportedException($"Метод сортировки {sortMethod} не поддерживается.")
+            };
+
+            // Добавляем заголовок обратно в результат
+            var result = new List<string> { headers }.Concat(sortedData).ToList();
+
+            // Запись результата в файл
+            _fileHandler.WriteToFile(result);
+
+            // Отправка сообщения о завершении сортировки
+            progress?.Report($"Все строки упорядочены по ключу \"{secondaryKeyName}\".\n");
+        }
+
+        private List<string> DirectMergeSort(
+            List<string> data,
+            int secondaryKeyIndex,
+            string secondaryKeyName,
+            IProgress<string> progress,
+            int delay)
+        {
+            // Разбиение данных на отдельные блоки
+            var sortedBlocks = SplitIntoSortedBlocks(data, secondaryKeyIndex);
+            progress?.Report($"Разбиение:\nКаждый элемент становится отдельным блоком.\nНачальное состояние:\n" +
+                            $"{string.Join("\n", sortedBlocks.Select(b => $"[{b[0]}]"))}");
+
+            int step = 1;
             while (sortedBlocks.Count > 1)
             {
                 var mergedBlocks = new List<List<string>>();
+                progress?.Report($"Слияние пар блоков: Шаг {step}");
 
                 for (int i = 0; i < sortedBlocks.Count; i += 2)
                 {
@@ -76,42 +104,47 @@ namespace Lab4.Task_2
                     {
                         var block1 = sortedBlocks[i];
                         var block2 = sortedBlocks[i + 1];
-                        var merged = Merge(block1, block2, primaryKeyIndex, visualizeStep);
-
+                        var merged = Merge(block1, block2, secondaryKeyIndex, progress);
                         mergedBlocks.Add(merged);
+
+                        progress?.Report(
+                            $"Слияние блоков:\n{string.Join(", ", block1)} и {string.Join(", ", block2)}.\nРезультат: {string.Join(", ", merged)}");
                     }
                     else
                     {
                         mergedBlocks.Add(sortedBlocks[i]);
+                        progress?.Report($"Блок \"{string.Join(", ", sortedBlocks[i])}\" остается без изменений.");
                     }
                 }
 
                 sortedBlocks = mergedBlocks;
-
-                // Визуализация текущего шага
-                var description = "Текущий результат: " + string.Join(", ", sortedBlocks.SelectMany(b => b));
-                _stepNumber++;
-                visualizeStep($"Шаг {_stepNumber}:\n{description}");
+                progress?.Report($"После шага {step}: осталось {sortedBlocks.Count} блоков.\n");
+                step++;
                 Thread.Sleep(delay);
             }
 
+            progress?.Report($"Все строки упорядочены по ключу \"{secondaryKeyName}\". Результат:\n{string.Join("\n", sortedBlocks[0])}");
             return sortedBlocks[0];
         }
 
-        /// <summary>
-        /// Реализация естественного слияния (Natural Merge Sort).
-        /// </summary>
         private List<string> NaturalMergeSort(
             List<string> data,
-            int primaryKeyIndex,
-            Action<string> visualizeStep,
+            int secondaryKeyIndex,
+            string secondaryKeyName,
+            IProgress<string> progress,
             int delay)
         {
-            var runs = FindNaturalRuns(data, primaryKeyIndex);
+            // Нахождение естественных последовательностей
+            var runs = FindNaturalRuns(data, secondaryKeyIndex);
+            progress?.Report(
+                $"Разбиение на естественные последовательности:\nНайдено {runs.Count} последовательностей:\n" +
+                $"{string.Join("\n", runs.Select(r => $"[{string.Join(", ", r)}]"))}");
 
+            int step = 1;
             while (runs.Count > 1)
             {
                 var mergedRuns = new List<List<string>>();
+                progress?.Report($"Слияние последовательностей: Шаг {step}");
 
                 for (int i = 0; i < runs.Count; i += 2)
                 {
@@ -119,196 +152,141 @@ namespace Lab4.Task_2
                     {
                         var run1 = runs[i];
                         var run2 = runs[i + 1];
-                        var merged = Merge(run1, run2, primaryKeyIndex, visualizeStep);
-
+                        var merged = Merge(run1, run2, secondaryKeyIndex, progress);
                         mergedRuns.Add(merged);
+
+                        progress?.Report(
+                            $"Слияние последовательностей:\n{string.Join(", ", run1)} и {string.Join(", ", run2)}.\nРезультат: {string.Join(", ", merged)}");
                     }
                     else
                     {
                         mergedRuns.Add(runs[i]);
+                        progress?.Report($"Последовательность \"{string.Join(", ", runs[i])}\" остается без изменений.");
                     }
                 }
 
                 runs = mergedRuns;
-
-                // Визуализация текущего шага
-                var description = "Текущий результат: " + string.Join(", ", runs.SelectMany(r => r));
-                _stepNumber++;
-                visualizeStep($"Шаг {_stepNumber}:\n{description}");
+                progress?.Report($"После шага {step}: осталось {runs.Count} последовательностей.\n");
+                step++;
                 Thread.Sleep(delay);
             }
 
+            progress?.Report($"Все строки упорядочены по ключу \"{secondaryKeyName}\". Результат:\n{string.Join("\n", runs.SelectMany(r => r))}");
             return runs.SelectMany(r => r).ToList();
         }
 
-        /// <summary>
-        /// Реализация многопутевого слияния (Multiway Merge Sort).
-        /// </summary>
         private List<string> MultiwayMergeSort(
             List<string> data,
-            int primaryKeyIndex,
-            Action<string> visualizeStep,
+            int secondaryKeyIndex,
+            string secondaryKeyName,
+            IProgress<string> progress,
             int delay)
         {
-            var runs = SplitIntoSortedBlocks(data, primaryKeyIndex);
+            // Разбиение данных на блоки
+            var runs = SplitIntoSortedBlocks(data, secondaryKeyIndex);
+            progress?.Report($"Начало многопутевого слияния:\nКоличество блоков: {runs.Count}\n" +
+                            $"{string.Join("\n", runs.Select((b, index) => $"Блок {index + 1}: [{string.Join(", ", b)}]"))}");
 
-            while (runs.Count > 1)
+            var sortedData = new List<string>();
+            var heap = new PriorityQueue<(string Key, int BlockIndex, int ElementIndex), string>();
+
+            // Инициализация PriorityQueue минимальными элементами каждого блока
+            for (int i = 0; i < runs.Count; i++)
             {
-                var mergedRuns = MergeMultiway(runs, primaryKeyIndex, visualizeStep);
-
-                // Визуализация текущего шага
-                var description = "Текущий результат: " + string.Join(", ", mergedRuns);
-                _stepNumber++;
-                visualizeStep($"Шаг {_stepNumber}:\n{description}");
-                Thread.Sleep(delay);
-
-                runs = SplitIntoSortedBlocks(mergedRuns, primaryKeyIndex);
+                if (runs[i].Count > 0)
+                {
+                    var key = GetKey(runs[i][0], secondaryKeyIndex);
+                    heap.Enqueue((key, i, 0), key);
+                }
             }
 
-            return runs.SelectMany(r => r).ToList();
+            progress?.Report($"Инициализация завершена: добавлено {heap.Count} минимальных элементов в очередь.");
+
+            // Многопутевое слияние
+            while (heap.Count > 0)
+            {
+                var min = heap.Dequeue();
+
+                var element = runs[min.BlockIndex][min.ElementIndex];
+                sortedData.Add(element);
+
+                progress?.Report($"Шаг {_stepNumber}: добавлен элемент \"{element}\" из блока {min.BlockIndex + 1}.");
+
+                int nextIndex = min.ElementIndex + 1;
+                if (nextIndex < runs[min.BlockIndex].Count)
+                {
+                    var key = GetKey(runs[min.BlockIndex][nextIndex], secondaryKeyIndex);
+                    heap.Enqueue((key, min.BlockIndex, nextIndex), key);
+                }
+
+                _stepNumber++;
+                Thread.Sleep(delay);
+            }
+
+            progress?.Report($"Все строки упорядочены по ключу \"{secondaryKeyName}\". Результат:\n{string.Join("\n", sortedData)}");
+            return sortedData;
         }
 
-        /// <summary>
-        /// Слияние двух блоков данных.
-        /// </summary>
         private List<string> Merge(
             List<string> block1,
             List<string> block2,
-            int primaryKeyIndex,
-            Action<string> visualizeStep)
+            int secondaryKeyIndex,
+            IProgress<string> progress)
         {
             int i = 0, j = 0;
             var merged = new List<string>();
 
             while (i < block1.Count && j < block2.Count)
             {
-                var element1 = block1[i];
-                var element2 = block2[j];
+                var key1 = GetKey(block1[i], secondaryKeyIndex);
+                var key2 = GetKey(block2[j], secondaryKeyIndex);
 
-                var primaryKey1 = GetKey(element1, primaryKeyIndex);
-                var primaryKey2 = GetKey(element2, primaryKeyIndex);
-
-                string action;
-
-                if (string.Compare(primaryKey1, primaryKey2) < 0)
+                if (string.Compare(key1, key2, StringComparison.Ordinal) < 0)
                 {
-                    merged.Add(element1);
-                    action = "Оставляем на месте";
+                    merged.Add(block1[i]);
+                    progress?.Report($"Сравнение ключей: {key1} < {key2}. Добавляем \"{block1[i]}\".");
                     i++;
                 }
                 else
                 {
-                    merged.Add(element2);
-                    action = "Перемещаем элемент";
+                    merged.Add(block2[j]);
+                    progress?.Report($"Сравнение ключей: {key1} >= {key2}. Добавляем \"{block2[j]}\".");
                     j++;
                 }
-
-                _stepNumber++;
-                var description = $"Шаг {_stepNumber}:\nСравниваем элементы:\n- {element1}\n- {element2}\nДействие: {action}.";
-                visualizeStep(description);
-                Thread.Sleep(500); // Задержка для визуализации
             }
 
-            // Обработка оставшихся элементов из block1
             while (i < block1.Count)
             {
-                var element = block1[i];
-                merged.Add(element);
+                merged.Add(block1[i]);
                 i++;
-
-                _stepNumber++;
-                var description = $"Шаг {_stepNumber}:\nДобавляем оставшийся элемент: {element}.";
-                visualizeStep(description);
-                Thread.Sleep(500);
             }
 
-            // Обработка оставшихся элементов из block2
             while (j < block2.Count)
             {
-                var element = block2[j];
-                merged.Add(element);
+                merged.Add(block2[j]);
                 j++;
-
-                _stepNumber++;
-                var description = $"Шаг {_stepNumber}:\nДобавляем оставшийся элемент: {element}.";
-                visualizeStep(description);
-                Thread.Sleep(500);
             }
 
             return merged;
         }
 
-        /// <summary>
-        /// Многопутевое слияние нескольких блоков данных.
-        /// </summary>
-        private List<string> MergeMultiway(
-            List<List<string>> blocks,
-            int primaryKeyIndex,
-            Action<string> visualizeStep)
+        private List<List<string>> SplitIntoSortedBlocks(List<string> data, int secondaryKeyIndex)
         {
-            var sortedData = new List<string>();
-
-            // Используем SortedSet для упорядочивания элементов по ключу
-            var heap = new SortedSet<(string Key, int BlockIndex, int ElementIndex)>();
-
-            for (int i = 0; i < blocks.Count; i++)
-            {
-                if (blocks[i].Count > 0)
-                {
-                    var key = GetKey(blocks[i][0], primaryKeyIndex);
-                    heap.Add((key, i, 0));
-                }
-            }
-
-            while (heap.Count > 0)
-            {
-                var min = heap.Min;
-                heap.Remove(min);
-
-                var element = blocks[min.BlockIndex][min.ElementIndex];
-                sortedData.Add(element);
-
-                // Визуализация добавления элемента
-                _stepNumber++;
-                var description = $"Шаг {_stepNumber}:\nДобавляем элемент: {element}.";
-                visualizeStep(description);
-                Thread.Sleep(500);
-
-                int nextIndex = min.ElementIndex + 1;
-                if (nextIndex < blocks[min.BlockIndex].Count)
-                {
-                    var key = GetKey(blocks[min.BlockIndex][nextIndex], primaryKeyIndex);
-                    heap.Add((key, min.BlockIndex, nextIndex));
-                }
-            }
-
-            return sortedData;
+            // Удаляем сортировку, чтобы сохранить исходный порядок
+            return data.Select(d => new List<string> { d }).ToList();
         }
 
-        /// <summary>
-        /// Разбиение данных на отсортированные блоки.
-        /// </summary>
-        private List<List<string>> SplitIntoSortedBlocks(List<string> data, int primaryKeyIndex)
-        {
-            return data.Select(d => new List<string> { d })
-                       .OrderBy(b => GetKey(b[0], primaryKeyIndex))
-                       .ToList();
-        }
-
-        /// <summary>
-        /// Нахождение естественных "ран" в данных для естественного слияния.
-        /// </summary>
-        private List<List<string>> FindNaturalRuns(List<string> data, int primaryKeyIndex)
+        private List<List<string>> FindNaturalRuns(List<string> data, int secondaryKeyIndex)
         {
             var runs = new List<List<string>>();
             var currentRun = new List<string> { data[0] };
 
             for (int i = 1; i < data.Count; i++)
             {
-                var currentKey = GetKey(data[i], primaryKeyIndex);
-                var previousKey = GetKey(data[i - 1], primaryKeyIndex);
+                var currentKey = GetKey(data[i], secondaryKeyIndex);
+                var previousKey = GetKey(data[i - 1], secondaryKeyIndex);
 
-                if (string.Compare(currentKey, previousKey) >= 0)
+                if (string.Compare(currentKey, previousKey, StringComparison.Ordinal) >= 0)
                 {
                     currentRun.Add(data[i]);
                 }
