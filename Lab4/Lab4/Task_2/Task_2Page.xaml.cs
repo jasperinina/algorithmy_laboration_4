@@ -1,301 +1,367 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 
-namespace Lab4.Task_2;
-
-public partial class Task_2Page : Page
+namespace Lab4.Task_2
 {
-    private MainWindow _mainWindow;
-    private StackPanel dynamicPanel;
-    private ComboBox sortMethodComboBox;
-    private TextBox inputFilePathTextBox;
-    private ComboBox sortAttributeComboBox; // Основной атрибут
-    private ComboBox secondaryAttributeComboBox; // Вторичный атрибут
-    private ComboBox valuesComboBox; // Уникальные значения основного атрибута
-
-    public Task_2Page(MainWindow mainWindow)
+    public partial class Task_2Page : Page
     {
-        InitializeComponent();
-        _mainWindow = mainWindow;
-        AddDynamicControls();
-    }
+        private MainWindow _mainWindow;
+        private StackPanel dynamicPanel;
+        private ComboBox sortMethodComboBox;
+        private TextBox inputFilePathTextBox;
+        private ComboBox filterAttributeComboBox; // Атрибут фильтрации
+        private ComboBox secondaryAttributeComboBox; // Вторичный атрибут сортировки
+        private ComboBox filterValueComboBox; // Значения для фильтрации
 
-    private void AddDynamicControls()
-    {
-        dynamicPanel = new StackPanel
+        public Task_2Page(MainWindow mainWindow)
         {
-            HorizontalAlignment = HorizontalAlignment.Left
-        };
-
-        TextBlock sortMethodHeader = new TextBlock
+            InitializeComponent();
+            _mainWindow = mainWindow;
+            AddDynamicControls();
+        }
+        
+        private void AddDynamicControls()
         {
-            Text = "Выберите метод сортировки",
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Style = (Style)_mainWindow.FindResource("HeaderTextBlockStyle"),
-            Margin = new Thickness(0, 0, 0, 5)
-        };
+            dynamicPanel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
 
-        sortMethodComboBox = new ComboBox
+            // Заголовок выбора метода сортировки
+            TextBlock sortMethodHeader = new TextBlock
+            {
+                Text = "Выберите метод сортировки",
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("HeaderTextBlockStyle"),
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+
+            // Комбобокс для выбора метода сортировки
+            sortMethodComboBox = new ComboBox
+            {
+                Width = 360,
+                Margin = new Thickness(0, 8, 0, 30),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("PopUp")
+            };
+            sortMethodComboBox.Items.Add("Прямое слияние");
+            sortMethodComboBox.Items.Add("Естественное слияние");
+            sortMethodComboBox.Items.Add("Многопутевое слияние");
+            sortMethodComboBox.SelectedIndex = 0;
+
+            // Заголовок выбора метода сортировки
+            TextBlock Header = new TextBlock
+            {
+                Text = "Введите данные для тестирования",
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("HeaderTextBlockStyle"),
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+            
+            // Заголовок выбора файла
+            TextBlock filePathTextBlock = new TextBlock
+            {
+                Text = "Путь к файлу",
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(0, 20, 0, 8),
+                Style = (Style)_mainWindow.FindResource("TextBlockStyle")
+            };
+
+            // Текстовое поле для ввода пути к файлу
+            inputFilePathTextBox = new TextBox
+            {
+                Width = 360,
+                Margin = new Thickness(0, 0, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("RoundedTextBoxStyle")
+            };
+
+            // Кнопка для открытия диалога выбора файла
+            Button browseFileButton = new Button
+            {
+                Content = "Обзор",
+                Width = 360,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(0, 20, 0, 8),
+                Style = (Style)_mainWindow.FindResource("OverwriteFileButtonStyle")
+            };
+            browseFileButton.Click += (s, e) => BrowseFileButton_Click(inputFilePathTextBox);
+
+            // Заголовок выбора атрибута фильтрации
+            TextBlock filterAttributeHeader = new TextBlock
+            {
+                Text = "Выберите атрибут фильтрации",
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("TextBlockStyle"),
+                Margin = new Thickness(0, 20, 0, 0)
+            };
+
+            // Комбобокс для выбора атрибута фильтрации
+            filterAttributeComboBox = new ComboBox
+            {
+                Width = 360,
+                Margin = new Thickness(0, 8, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("PopUp")
+            };
+            filterAttributeComboBox.SelectionChanged += FilterAttributeComboBox_SelectionChanged;
+
+            // Заголовок выбора значения фильтрации
+            TextBlock filterValueTextBlock = new TextBlock
+            {
+                Text = "Выберите значение фильтрации",
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("TextBlockStyle"),
+                Margin = new Thickness(0, 20, 0, 0)
+            };
+
+            // Комбобокс для выбора значения фильтрации
+            filterValueComboBox = new ComboBox
+            {
+                Width = 360,
+                Margin = new Thickness(0, 8, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("PopUp")
+            };
+
+            // Заголовок выбора вторичного атрибута сортировки
+            TextBlock secondaryAttributeHeader = new TextBlock
+            {
+                Text = "Выберите ключ сортировки",
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("TextBlockStyle"),
+                Margin = new Thickness(0, 20, 0, 0)
+            };
+
+            // Комбобокс для выбора вторичного атрибута сортировки
+            secondaryAttributeComboBox = new ComboBox
+            {
+                Width = 360,
+                Margin = new Thickness(0, 8, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("PopUp")
+            };
+
+            // Кнопка для запуска сортировки
+            Button executeButton = new Button
+            {
+                Content = "Запустить сортировку",
+                Width = 360,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(0, 60, 0, 0),
+                Style = (Style)_mainWindow.FindResource("RoundedButtonStyle")
+            };
+            executeButton.Click += (s, e) => ExecuteSortButton_Click();
+
+            dynamicPanel.Children.Add(sortMethodHeader);
+            dynamicPanel.Children.Add(sortMethodComboBox);
+            dynamicPanel.Children.Add(Header);
+            dynamicPanel.Children.Add(filePathTextBlock);
+            dynamicPanel.Children.Add(inputFilePathTextBox);
+            dynamicPanel.Children.Add(browseFileButton);
+            dynamicPanel.Children.Add(filterAttributeHeader);
+            dynamicPanel.Children.Add(filterAttributeComboBox);
+            dynamicPanel.Children.Add(filterValueTextBlock);
+            dynamicPanel.Children.Add(filterValueComboBox);
+            dynamicPanel.Children.Add(secondaryAttributeHeader);
+            dynamicPanel.Children.Add(secondaryAttributeComboBox);
+            dynamicPanel.Children.Add(executeButton);
+
+            _mainWindow.PageContentControl.Content = dynamicPanel;
+        }
+        
+        private void BrowseFileButton_Click(TextBox inputFilePathTextBox)
         {
-            Width = 360,
-            Margin = new Thickness(0, 8, 0, 30),
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Style = (Style)_mainWindow.FindResource("PopUp")
-        };
-        sortMethodComboBox.Items.Add("Прямое слияние");
-        sortMethodComboBox.Items.Add("Естественное слияние");
-        sortMethodComboBox.Items.Add("Многопутевое слияние");
-        sortMethodComboBox.SelectedIndex = 0;
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*"
+            };
 
-        TextBlock depthTextBlock = new TextBlock
+            if (openFileDialog.ShowDialog() == true)
+            {
+                inputFilePathTextBox.Text = openFileDialog.FileName;
+
+                try
+                {
+                    var lines = File.ReadAllLines(openFileDialog.FileName);
+
+                    if (lines.Length < 2)
+                    {
+                        MessageBox.Show("Файл должен содержать заголовок и хотя бы одну строку данных.", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
+                    var data = lines.Skip(1).Select(line => line.Split(',').Select(col => col.Trim()).ToArray()).ToList();
+
+                    // Заполнение комбобокса атрибутов фильтрации всеми заголовками
+                    filterAttributeComboBox.Items.Clear();
+                    foreach (var column in headers)
+                    {
+                        filterAttributeComboBox.Items.Add(column);
+                    }
+
+                    if (filterAttributeComboBox.Items.Count > 0)
+                    {
+                        filterAttributeComboBox.SelectedIndex = 0;
+                        UpdateFilterValueComboBox(data, headers, filterAttributeComboBox.SelectedItem.ToString());
+                    }
+
+                    // Заполнение комбобокса вторичных атрибутов
+                    UpdateSecondaryComboBox(headers);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+        }
+        
+        private void FilterAttributeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Text = "Путь к файлу",
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Margin = new Thickness(0, 20, 0, 8),
-            Style = (Style)_mainWindow.FindResource("TextBlockStyle")
-        };
+            if (filterAttributeComboBox.SelectedItem == null || string.IsNullOrEmpty(inputFilePathTextBox.Text))
+                return;
 
-        inputFilePathTextBox = new TextBox
+            var selectedAttribute = filterAttributeComboBox.SelectedItem.ToString();
+            var headers = File.ReadLines(inputFilePathTextBox.Text).First().Split(',').Select(h => h.Trim()).ToArray();
+            var data = File.ReadAllLines(inputFilePathTextBox.Text).Skip(1)
+                .Select(line => line.Split(',').Select(col => col.Trim()).ToArray()).ToList();
+
+            UpdateFilterValueComboBox(data, headers, selectedAttribute);
+        }
+        
+        private void UpdateFilterValueComboBox(List<string[]> data, string[] headers, string selectedAttribute)
         {
-            Width = 360,
-            Margin = new Thickness(0, 0, 0, 0),
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Style = (Style)_mainWindow.FindResource("RoundedTextBoxStyle")
-        };
+            int columnIndex = Array.IndexOf(headers, selectedAttribute);
 
-        Button browseFileButton = new Button
+            if (columnIndex == -1)
+                return;
+
+            var uniqueValues = data.Select(row => row[columnIndex]).Distinct().ToList();
+            filterValueComboBox.ItemsSource = uniqueValues;
+            if (uniqueValues.Count > 0)
+                filterValueComboBox.SelectedIndex = 0;
+        }
+        
+        private void UpdateSecondaryComboBox(string[] headers)
         {
-            Content = "Обзор",
-            Width = 360,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Margin = new Thickness(0, 20, 0, 8),
-            Style = (Style)_mainWindow.FindResource("OverwriteFileButtonStyle")
-        };
-        browseFileButton.Click += (s, e) => BrowseFileButton_Click(inputFilePathTextBox);
+            if (filterAttributeComboBox.SelectedItem == null)
+                return;
 
-        TextBlock sortAttributeHeader = new TextBlock
+            var primaryAttribute = filterAttributeComboBox.SelectedItem.ToString();
+            secondaryAttributeComboBox.Items.Clear();
+
+            foreach (var header in headers)
+            {
+                if (header != primaryAttribute)
+                {
+                    secondaryAttributeComboBox.Items.Add(header);
+                }
+            }
+
+            if (secondaryAttributeComboBox.Items.Count > 0)
+            {
+                secondaryAttributeComboBox.SelectedIndex = 0;
+            }
+        }
+        
+        private async void ExecuteSortButton_Click()
         {
-            Text = "Выберите основной атрибут сортировки",
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Style = (Style)_mainWindow.FindResource("TextBlockStyle"),
-            Margin = new Thickness(0, 20, 0, 0)
-        };
-
-        sortAttributeComboBox = new ComboBox
-        {
-            Width = 360,
-            Margin = new Thickness(0, 8, 0, 0),
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Style = (Style)_mainWindow.FindResource("PopUp")
-        };
-        sortAttributeComboBox.SelectionChanged += SortAttributeComboBox_SelectionChanged;
-
-        TextBlock valuesTextBlock = new TextBlock
-        {
-            Text = "Выберите значение основного атрибута",
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Style = (Style)_mainWindow.FindResource("TextBlockStyle"),
-            Margin = new Thickness(0, 20, 0, 0)
-        };
-
-        valuesComboBox = new ComboBox
-        {
-            Width = 360,
-            Margin = new Thickness(0, 8, 0, 30),
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Style = (Style)_mainWindow.FindResource("PopUp")
-        };
-
-        TextBlock secondaryAttributeHeader = new TextBlock
-        {
-            Text = "Выберите вторичный атрибут сортировки",
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Style = (Style)_mainWindow.FindResource("TextBlockStyle"),
-            Margin = new Thickness(0, 20, 0, 0)
-        };
-
-        secondaryAttributeComboBox = new ComboBox
-        {
-            Width = 360,
-            Margin = new Thickness(0, 8, 0, 30),
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Style = (Style)_mainWindow.FindResource("PopUp")
-        };
-
-        Button executeButton = new Button
-        {
-            Content = "Запустить сортировку",
-            Width = 360,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Margin = new Thickness(0, 50, 0, 0),
-            Style = (Style)_mainWindow.FindResource("RoundedButtonStyle")
-        };
-        executeButton.Click += (s, e) => ExecuteSortButton_Click();
-
-        dynamicPanel.Children.Add(sortMethodHeader);
-        dynamicPanel.Children.Add(sortMethodComboBox);
-        dynamicPanel.Children.Add(depthTextBlock);
-        dynamicPanel.Children.Add(inputFilePathTextBox);
-        dynamicPanel.Children.Add(browseFileButton);
-        dynamicPanel.Children.Add(sortAttributeHeader);
-        dynamicPanel.Children.Add(sortAttributeComboBox);
-        dynamicPanel.Children.Add(valuesTextBlock);
-        dynamicPanel.Children.Add(valuesComboBox);
-        dynamicPanel.Children.Add(secondaryAttributeHeader);
-        dynamicPanel.Children.Add(secondaryAttributeComboBox);
-        dynamicPanel.Children.Add(executeButton);
-
-        _mainWindow.PageContentControl.Content = dynamicPanel;
-    }
-
-    private void BrowseFileButton_Click(TextBox inputFilePathTextBox)
-    {
-        var openFileDialog = new OpenFileDialog
-        {
-            Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*"
-        };
-
-        if (openFileDialog.ShowDialog() == true)
-        {
-            inputFilePathTextBox.Text = openFileDialog.FileName;
-
             try
             {
-                var lines = File.ReadAllLines(openFileDialog.FileName);
+                var sortMethod = sortMethodComboBox.SelectedItem?.ToString();
+                var inputFilePath = inputFilePathTextBox.Text;
+                var filterAttribute = filterAttributeComboBox.SelectedItem?.ToString();
+                var filterValue = filterValueComboBox.SelectedItem?.ToString(); // Значение для фильтрации
+                var secondarySortAttribute = secondaryAttributeComboBox.SelectedItem?.ToString(); // Вторичный атрибут
 
-                if (lines.Length < 2)
+                // Валидация вводимых данных
+                if (string.IsNullOrWhiteSpace(sortMethod))
                 {
-                    MessageBox.Show("Файл должен содержать заголовок и хотя бы одну строку данных.", "Ошибка",
+                    MessageBox.Show("Выберите метод сортировки.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(inputFilePath) || !File.Exists(inputFilePath))
+                {
+                    MessageBox.Show("Укажите путь к файлу.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(filterAttribute))
+                {
+                    MessageBox.Show("Выберите атрибут фильтрации.", "Ошибка", MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(filterValue))
+                {
+                    MessageBox.Show("Выберите значение фильтрации.", "Ошибка", MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(secondarySortAttribute))
+                {
+                    MessageBox.Show("Выберите вторичный атрибут сортировки.", "Ошибка", MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+
+                var headers = File.ReadLines(inputFilePath).First().Split(',').Select(h => h.Trim()).ToArray();
+                var filterKeyIndex = Array.IndexOf(headers, filterAttribute);
+                var secondaryKeyIndex = Array.IndexOf(headers, secondarySortAttribute);
+
+                if (filterKeyIndex == -1)
+                {
+                    MessageBox.Show($"Атрибут фильтрации '{filterAttribute}' не найден в заголовке файла.", "Ошибка",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                var headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
-                var data = lines.Skip(1).Select(line => line.Split(',').Select(col => col.Trim()).ToArray()).ToList();
-
-                // Выводим только те столбцы, которые имеют дубликаты (если это необходимо)
-                var columnsWithDuplicates = headers.Where((header, i) =>
-                    data.Select(row => row[i]).Distinct().Count() < data.Count).ToList();
-
-                sortAttributeComboBox.Items.Clear();
-                foreach (var column in columnsWithDuplicates)
+                if (secondaryKeyIndex == -1)
                 {
-                    sortAttributeComboBox.Items.Add(column);
+                    MessageBox.Show($"Вторичный атрибут сортировки '{secondarySortAttribute}' не найден в заголовке файла.", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
 
-                if (sortAttributeComboBox.Items.Count > 0)
-                {
-                    sortAttributeComboBox.SelectedIndex = 0;
-                    UpdateValuesComboBox(data, headers, sortAttributeComboBox.SelectedItem.ToString());
-                }
+                var fileHandler = new FileHandler(inputFilePath, "output.txt");
+                var sorter = new ExternalSorter(fileHandler);
 
-                // Фильтрация строк, которые не содержат основной атрибут будет выполняться при сортировке
+                // Очистка области вывода перед началом сортировки
+                OutputTextBox.Clear();
+
+                // Создание объекта Progress для обновления UI
+                var progress = new Progress<string>(description => UpdateVisualization(description));
+
+                // Запуск сортировки в отдельном потоке, чтобы не блокировать UI
+                await Task.Run(() =>
+                {
+                    sorter.Sort(sortMethod, filterKeyIndex, filterValue, secondaryKeyIndex,
+                        progress, delay: 1000);
+                });
+
+
+                MessageBox.Show("Сортировка завершена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при чтении файла: {ex.Message}", "Ошибка", MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-    }
-
-    private void SortAttributeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (sortAttributeComboBox.SelectedItem == null || inputFilePathTextBox.Text == string.Empty)
-            return;
-
-        var selectedAttribute = sortAttributeComboBox.SelectedItem.ToString();
-        var headers = File.ReadLines(inputFilePathTextBox.Text).First().Split(',').Select(h => h.Trim()).ToArray();
-        var data = File.ReadAllLines(inputFilePathTextBox.Text).Skip(1)
-            .Select(line => line.Split(',').Select(col => col.Trim()).ToArray()).ToList();
-
-        UpdateSecondaryComboBox(headers);
-        UpdateValuesComboBox(data, headers, selectedAttribute);
-    }
-
-    private void UpdateValuesComboBox(List<string[]> data, string[] headers, string selectedAttribute)
-    {
-        int columnIndex = Array.IndexOf(headers, selectedAttribute);
-
-        if (columnIndex == -1)
-            return;
-
-        var uniqueValues = data.Select(row => row[columnIndex]).Distinct().ToList();
-        valuesComboBox.ItemsSource = uniqueValues;
-    }
-
-    private void UpdateSecondaryComboBox(string[] headers)
-    {
-        if (sortAttributeComboBox.SelectedItem == null)
-            return;
-
-        var primaryAttribute = sortAttributeComboBox.SelectedItem.ToString();
-        secondaryAttributeComboBox.Items.Clear();
-
-        foreach (var header in headers)
+        
+        private void UpdateVisualization(string description)
         {
-            if (header != primaryAttribute)
-            {
-                secondaryAttributeComboBox.Items.Add(header);
-            }
-        }
-
-        if (secondaryAttributeComboBox.Items.Count > 0)
-        {
-            secondaryAttributeComboBox.SelectedIndex = 0;
+            OutputTextBox.AppendText($"{description}{Environment.NewLine}{Environment.NewLine}");
+            OutputTextBox.ScrollToEnd(); // Автоматическая прокрутка вниз
         }
     }
-
-    private async void ExecuteSortButton_Click()
-    {
-        try
-        {
-            var sortMethod = sortMethodComboBox.SelectedItem.ToString();
-            var inputFilePath = inputFilePathTextBox.Text;
-            var primarySortAttribute = sortAttributeComboBox.SelectedItem.ToString();
-
-            var headers = File.ReadLines(inputFilePath).First().Split(',');
-
-            var primaryKeyIndex = Array.IndexOf(headers, primarySortAttribute);
-
-            if (primaryKeyIndex == -1)
-            {
-                MessageBox.Show($"Атрибут {primarySortAttribute} не найден в заголовке файла.", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            var fileHandler = new FileHandler(inputFilePath, "output.txt");
-            var sorter = new ExternalSorter(fileHandler);
-
-            // Очистите OutputTextBox перед началом сортировки
-            OutputTextBox.Clear();
-
-            // Запуск сортировки в отдельном потоке, чтобы не блокировать UI
-            await Task.Run(() =>
-            {
-                sorter.Sort(sortMethod, primaryKeyIndex,
-                    description =>
-                    {
-                        Dispatcher.Invoke(() => UpdateVisualization(description));
-                    },
-                    delay: 1000);
-            });
-
-            MessageBox.Show("Сортировка завершена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
-    private void UpdateVisualization(string description)
-    {
-        OutputTextBox.AppendText($"{description}{Environment.NewLine}{Environment.NewLine}");
-        OutputTextBox.ScrollToEnd(); // Автоматическая прокрутка вниз
-    }
-
 }
