@@ -8,12 +8,12 @@ namespace Lab4.Task_1.Sorting_Algorithms
 {
     public class QuickSort : SortingAlgorithm
     {
-        public override void Sort(int[] array, List<(int, int)> sortSteps)
+        public override void Sort(int[] array, List<(int, int, bool)> sortSteps)
         {
             QuickSortRecursive(array, 0, array.Length - 1, sortSteps);
         }
 
-        private void QuickSortRecursive(int[] array, int low, int high, List<(int, int)> sortSteps)
+        private void QuickSortRecursive(int[] array, int low, int high, List<(int, int, bool)> sortSteps)
         {
             if (low < high)
             {
@@ -23,23 +23,28 @@ namespace Lab4.Task_1.Sorting_Algorithms
             }
         }
 
-        private int Partition(int[] array, int low, int high, List<(int, int)> sortSteps)
+        private int Partition(int[] array, int low, int high, List<(int, int, bool)> sortSteps)
         {
             int pivot = array[high];
             int i = low - 1;
 
             for (int j = low; j < high; j++)
             {
+                // Добавляем действие сравнения в sortSteps
+                sortSteps.Add((j, high, false));
+
                 if (array[j] < pivot)
                 {
                     i++;
                     (array[i], array[j]) = (array[j], array[i]);
-                    sortSteps.Add((i, j));
+                    // Добавляем действие перестановки в sortSteps
+                    sortSteps.Add((i, j, true));
                 }
             }
 
             (array[i + 1], array[high]) = (array[high], array[i + 1]);
-            sortSteps.Add((i + 1, high));
+            // Добавляем действие перестановки в sortSteps
+            sortSteps.Add((i + 1, high, true));
             return i + 1;
         }
     }

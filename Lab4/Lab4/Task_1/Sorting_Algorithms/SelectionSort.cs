@@ -8,7 +8,7 @@ namespace Lab4.Task_1.Sorting_Algorithms
 {
     public class SelectionSort : SortingAlgorithm
     {
-        public override void Sort(int[] array, List<(int, int)> sortSteps)
+        public override void Sort(int[] array, List<(int, int, bool)> sortSteps)
         {
             int n = array.Length;
 
@@ -25,14 +25,12 @@ namespace Lab4.Task_1.Sorting_Algorithms
                     }
                 }
 
-                // Меняем местами найденный минимальный элемент с первым элементом в неотсортированной части
-                if (minIndex != i)
+                bool shouldSwap = minIndex != i;
+                if (shouldSwap)
                 {
-                    int temp = array[i];
-                    array[i] = array[minIndex];
-                    array[minIndex] = temp;
-                    sortSteps.Add((i, minIndex));
+                    (array[i], array[minIndex]) = (array[minIndex], array[i]);
                 }
+                sortSteps.Add((i, minIndex, shouldSwap));
             }
         }
     }
