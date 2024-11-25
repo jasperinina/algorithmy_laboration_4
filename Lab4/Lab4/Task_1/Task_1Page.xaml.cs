@@ -158,9 +158,7 @@ public partial class Task_1Page : Page
 
             // Получаем текущие позиции элементов
             double shape1X = Canvas.GetLeft(shape1);
-            double shape1Y = Canvas.GetTop(shape1);
             double shape2X = Canvas.GetLeft(shape2);
-            double shape2Y = Canvas.GetTop(shape2);
 
             // Анимируем перемещение shape1 на место shape2
             await Animate(shape1, shape2, shape2X, shape1X);
@@ -173,7 +171,7 @@ public partial class Task_1Page : Page
             int index1 = rectangles.IndexOf(shape1);
             int index2 = rectangles.IndexOf(shape2);
             (rectangles[index1], rectangles[index2]) = (rectangles[index2], rectangles[index1]);
-            LogTextBox.Text += $"Сравниваем {height1} и {height2}, {height1} > {height2} Меняем местами\n";
+            LogTextBox.Text += $"Шаг({currentStepIndex + 1}) Сравниваем {height1} и {height2}, {height1} > {height2} Меняем местами\n";
             LogTextBox.ScrollToEnd();
         }
         else
@@ -188,7 +186,7 @@ public partial class Task_1Page : Page
             // Возвращаем цвет обратно на синий
             shape1.Fill = Brushes.Blue;
             shape2.Fill = Brushes.Blue;
-            LogTextBox.Text += $"Сравниваем {height1} и {height2}, {height1} < {height2} Остаются на местах\n";
+            LogTextBox.Text += $"Шаг({currentStepIndex + 1}) Сравниваем {height1} и {height2}, {height1} < {height2} Остаются на местах\n";
             LogTextBox.ScrollToEnd();
         }
     }
