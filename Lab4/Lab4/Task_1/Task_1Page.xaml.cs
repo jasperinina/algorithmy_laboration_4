@@ -6,6 +6,8 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Threading.Tasks;
 using Lab4.Task_1.Sorting_Algorithms;
+using System.Windows.Input;
+using System.Threading;
 
 namespace Lab4.Task_1;
 
@@ -21,6 +23,7 @@ public partial class Task_1Page : Page
     private bool isAnimating;
     private SortingAlgorithm selectedSortingAlgorithm;
     private DataGenerator dataGenerator;
+    private double Timeset;
 
     public Task_1Page(MainWindow mainWindow)
     {
@@ -29,6 +32,7 @@ public partial class Task_1Page : Page
         InitializeComponent();
         InitializeSortingAlgorithms();
         dataGenerator = new DataGenerator();
+        Timeset = 1;
     }
     private void InitializeSortingAlgorithms()
     {
@@ -41,7 +45,7 @@ public partial class Task_1Page : Page
     }
     private void InitializeData()
     {
-        numbers = dataGenerator.ArrayGenerate(10, 10).ToList();
+        numbers = dataGenerator.ArrayGenerate(50, 50).ToList();
         sortSteps = new List<(int, int, bool)>();
         rectangles = new List<Rectangle>();
         selectedSortingAlgorithm.Sort(numbers.ToArray(), sortSteps);
@@ -71,6 +75,13 @@ public partial class Task_1Page : Page
             rectangles.Add(rect);
 
             Spacing += RectangleWidth;
+        }
+    }
+    private void TimeSetSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (TimeSetSlider != null)
+        {
+            Timeset = TimeSetSlider.Value;
         }
     }
     private async void StartButton_Click(object sender, RoutedEventArgs e)
@@ -181,7 +192,7 @@ public partial class Task_1Page : Page
             shape2.Fill = Brushes.Red;
 
             // Ждем некоторое время, чтобы пользователь мог увидеть изменение цвета
-            await Task.Delay(500);
+            await Task.Delay((int)Math.Round(1000 * (1 / Timeset)));
 
             // Возвращаем цвет обратно на синий
             shape1.Fill = Brushes.Blue;
@@ -194,13 +205,13 @@ public partial class Task_1Page : Page
     {
         double currentX1 = Canvas.GetLeft(shape1);
         double currentX2 = Canvas.GetLeft(shape2);
-        int flag = 20;
+        int flag = 10;
 
         while (Math.Abs(currentX1 - targetX1) > 1 || Math.Abs(currentX2 - targetX2) > 1)
         {
             if (Math.Abs(currentX1 - targetX1) > 1)
             {
-                currentX1 += (targetX1 - currentX1) / (100.0 / flag);
+                currentX1 += (targetX1 - currentX1) / ((int)Math.Round((100 / flag) * (1 / Timeset)));
                 Canvas.SetLeft(shape1, currentX1);
             }
             else if (Math.Abs(currentX1 - targetX1) < 1)
@@ -209,14 +220,14 @@ public partial class Task_1Page : Page
             }
             if (Math.Abs(currentX2 - targetX2) > 1)
             {
-                currentX2 += (targetX2 - currentX2) / (100.0 / flag);
+                currentX2 += (targetX2 - currentX2) / ((int)Math.Round((100 / flag) * (1 / Timeset)));
                 Canvas.SetLeft(shape2, currentX2);
             }
             else if (Math.Abs(currentX2 - targetX2) < 1)
             {
                 Canvas.SetLeft(shape2, targetX2);
             }
-            await Task.Delay(100 / flag);
+            await Task.Delay((int)Math.Round((100 / flag) * (1 / Timeset)));
         }
         Canvas.SetLeft(shape1, targetX1);
         Canvas.SetLeft(shape2, targetX2);
