@@ -13,7 +13,7 @@ public partial class Task_1Page : Page
 {
     private MainWindow _mainWindow;
     private List<int> numbers;
-    private List<(int, int)> sortSteps;
+    private List<(int, int, bool)> sortSteps;
     private List<Rectangle> rectangles;
     private double RectangleWidth;
     private int maxNumber;
@@ -28,6 +28,7 @@ public partial class Task_1Page : Page
         _mainWindow = mainWindow;
         InitializeComponent();
         InitializeSortingAlgorithms();
+        dataGenerator = new DataGenerator();
     }
     private void InitializeSortingAlgorithms()
     {
@@ -40,19 +41,20 @@ public partial class Task_1Page : Page
     }
     private void InitializeData()
     {
-        numbers = new List<int>() { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
-        sortSteps = new List<(int, int)>();
+        numbers = dataGenerator.ArrayGenerate(10, 10).ToList();
+        sortSteps = new List<(int, int, bool)>();
         rectangles = new List<Rectangle>();
         selectedSortingAlgorithm.Sort(numbers.ToArray(), sortSteps);
         maxNumber = numbers.Max();
         RectangleWidth = Canvas.ActualWidth / numbers.Count;
     }
+
     private void DrawRectangles()
     {
         double Spacing = 0;
         foreach (int number in numbers)
         {
-            double height = number * Canvas.ActualHeight * 0.95 / maxNumber;
+            double height = (number) * Canvas.ActualHeight * 0.95 / maxNumber;
 
             Rectangle rect = new Rectangle
             {
@@ -87,7 +89,7 @@ public partial class Task_1Page : Page
     {
         if (!isAnimating && currentStepIndex < sortSteps.Count)
         {
-            await SwapElements(rectangles[sortSteps[currentStepIndex].Item1], rectangles[sortSteps[currentStepIndex].Item2]);
+            await SwapElements(rectangles[sortSteps[currentStepIndex].Item1], rectangles[sortSteps[currentStepIndex].Item2], sortSteps[currentStepIndex].Item3);
             currentStepIndex++;
         }
     }
@@ -96,7 +98,7 @@ public partial class Task_1Page : Page
         if (!isAnimating && currentStepIndex > 0)
         {
             currentStepIndex--;
-            await SwapElements(rectangles[sortSteps[currentStepIndex].Item2], rectangles[sortSteps[currentStepIndex].Item1]);
+            await SwapElements(rectangles[sortSteps[currentStepIndex].Item2], rectangles[sortSteps[currentStepIndex].Item1], sortSteps[currentStepIndex].Item3);
         }
     }
     private void ResetButton_Click(object sender, RoutedEventArgs e)
@@ -106,6 +108,7 @@ public partial class Task_1Page : Page
         Canvas.Children.Clear();
         InitializeData();
         DrawRectangles();
+        LogTextBox.Text = string.Empty;
     }
     private void SortingAlgorithmComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -138,65 +141,84 @@ public partial class Task_1Page : Page
     {
         while (isAnimating && currentStepIndex < sortSteps.Count)
         {
-            await SwapElements(rectangles[sortSteps[currentStepIndex].Item1], rectangles[sortSteps[currentStepIndex].Item2]);
+            await SwapElements(rectangles[sortSteps[currentStepIndex].Item1], rectangles[sortSteps[currentStepIndex].Item2], sortSteps[currentStepIndex].Item3);
             currentStepIndex++;
         }
         isAnimating = false;
     }
-    private async Task SwapElements(Rectangle shape1, Rectangle shape2)
+    private async Task SwapElements(Rectangle shape1, Rectangle shape2, bool shouldSwap)
     {
-        double shape1X = Canvas.GetLeft(shape1);
-        double shape1Y = Canvas.GetTop(shape1);
-        double shape2X = Canvas.GetLeft(shape2);
-        double shape2Y = Canvas.GetTop(shape2);
-
-        await Animate(shape1, shape2X, shape2Y);
-        await Animate(shape2, shape1X, shape1Y);
-        int index1 = rectangles.IndexOf(shape1);
-        int index2 = rectangles.IndexOf(shape2);
-        (rectangles[index1], rectangles[index2]) = (rectangles[index2], rectangles[index1]);
-    }
-    private async Task Animate(Rectangle shape, double targetX, double targetY)
-    {
-        double currentX = Canvas.GetLeft(shape);
-        double currentY = Canvas.GetTop(shape);
-        int flag = 60;
-
-        while (Math.Abs(currentX - targetX) > 1 || Math.Abs(currentY - targetY) > 1)
+        double height1 = Math.Round(shape1.Height * maxNumber / Canvas.ActualHeight * 0.95, 0);
+        double height2 = Math.Round(shape2.Height * maxNumber / Canvas.ActualHeight * 0.95, 0);
+        if (shouldSwap)
         {
-            if (Math.Abs(currentX - targetX) > 1)
+            // Меняем цвет на зеленый перед анимацией
+            shape1.Fill = Brushes.Green;
+            shape2.Fill = Brushes.Green;
+
+            // Получаем текущие позиции элементов
+            double shape1X = Canvas.GetLeft(shape1);
+            double shape2X = Canvas.GetLeft(shape2);
+
+            // Анимируем перемещение shape1 на место shape2
+            await Animate(shape1, shape2, shape2X, shape1X);
+
+            // Возвращаем цвет обратно на синий после анимации
+            shape1.Fill = Brushes.Blue;
+            shape2.Fill = Brushes.Blue;
+
+            // Обновляем список прямоугольников
+            int index1 = rectangles.IndexOf(shape1);
+            int index2 = rectangles.IndexOf(shape2);
+            (rectangles[index1], rectangles[index2]) = (rectangles[index2], rectangles[index1]);
+            LogTextBox.Text += $"Шаг({currentStepIndex + 1}) Сравниваем {height1} и {height2}, {height1} > {height2} Меняем местами\n";
+            LogTextBox.ScrollToEnd();
+        }
+        else
+        {
+            // Меняем цвет на красный, если не нужно менять местами
+            shape1.Fill = Brushes.Red;
+            shape2.Fill = Brushes.Red;
+
+            // Ждем некоторое время, чтобы пользователь мог увидеть изменение цвета
+            await Task.Delay(500);
+
+            // Возвращаем цвет обратно на синий
+            shape1.Fill = Brushes.Blue;
+            shape2.Fill = Brushes.Blue;
+            LogTextBox.Text += $"Шаг({currentStepIndex + 1}) Сравниваем {height1} и {height2}, {height1} < {height2} Остаются на местах\n";
+            LogTextBox.ScrollToEnd();
+        }
+    }
+    private async Task Animate(Rectangle shape1, Rectangle shape2, double targetX1, double targetX2)
+    {
+        double currentX1 = Canvas.GetLeft(shape1);
+        double currentX2 = Canvas.GetLeft(shape2);
+        int flag = 20;
+
+        while (Math.Abs(currentX1 - targetX1) > 1 || Math.Abs(currentX2 - targetX2) > 1)
+        {
+            if (Math.Abs(currentX1 - targetX1) > 1)
             {
-                currentX += (targetX - currentX) / (100.0 / flag);
-                Canvas.SetLeft(shape, currentX);
+                currentX1 += (targetX1 - currentX1) / (100.0 / flag);
+                Canvas.SetLeft(shape1, currentX1);
             }
-            if (Math.Abs(currentY - targetY) > 1)
+            else if (Math.Abs(currentX1 - targetX1) < 1)
             {
-                currentY += (targetY - currentY) / (100.0 / flag);
-                Canvas.SetTop(shape, currentY);
+                Canvas.SetLeft(shape1, targetX1);
             }
-            if (currentX < 0)
+            if (Math.Abs(currentX2 - targetX2) > 1)
             {
-                currentX = 0;
-                Canvas.SetLeft(shape, currentX);
+                currentX2 += (targetX2 - currentX2) / (100.0 / flag);
+                Canvas.SetLeft(shape2, currentX2);
             }
-            if (currentX + shape.Width > Canvas.ActualWidth)
+            else if (Math.Abs(currentX2 - targetX2) < 1)
             {
-                currentX = Canvas.ActualWidth - shape.Width;
-                Canvas.SetLeft(shape, currentX);
-            }
-            if (currentY < 0)
-            {
-                currentY = 0;
-                Canvas.SetTop(shape, currentY);
-            }
-            if (currentY + shape.Height > Canvas.ActualHeight)
-            {
-                currentY = Canvas.ActualHeight - shape.Height;
-                Canvas.SetTop(shape, currentY);
+                Canvas.SetLeft(shape2, targetX2);
             }
             await Task.Delay(100 / flag);
         }
-        Canvas.SetLeft(shape, targetX);
-        Canvas.SetTop(shape, targetY);
+        Canvas.SetLeft(shape1, targetX1);
+        Canvas.SetLeft(shape2, targetX2);
     }
 }

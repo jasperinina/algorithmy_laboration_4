@@ -15,7 +15,7 @@ namespace Lab4.Task_1
 
             for (int i = 0; i < arrayLength; i++)
             {
-                array[i] = rnd.Next(maxRandomValue);
+                array[i] = rnd.Next(1, maxRandomValue);
             }
 
             return array;

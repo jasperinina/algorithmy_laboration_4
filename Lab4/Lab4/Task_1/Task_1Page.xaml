@@ -20,6 +20,7 @@
             <Button x:Name="NextButton" Content="Следующий шаг" Click="NextButton_Click" Margin="5"/>
             <Button x:Name="BackButton" Content="Шаг назад" Click="BackButton_Click" Margin="5"/>
             <Button x:Name="ResetButton" Content="Сбросить" Click="ResetButton_Click" Margin="5"/>
+            <TextBox x:Name="LogTextBox" Width="400" Height="35" Margin="5" IsReadOnly="True" VerticalScrollBarVisibility="Hidden"/>
         </StackPanel>
     </Grid>
 </Page>

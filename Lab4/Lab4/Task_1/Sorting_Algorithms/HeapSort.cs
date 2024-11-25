@@ -8,7 +8,7 @@ namespace Lab4.Task_1.Sorting_Algorithms
 {
     public class HeapSort : SortingAlgorithm
     {
-        public override void Sort(int[] array, List<(int, int)> sortSteps)
+        public override void Sort(int[] array, List<(int, int, bool)> sortSteps)
         {
             int n = array.Length;
 
@@ -22,12 +22,12 @@ namespace Lab4.Task_1.Sorting_Algorithms
             for (int i = n - 1; i > 0; i--)
             {
                 (array[0], array[i]) = (array[i], array[0]);
-                sortSteps.Add((0, i));
+                sortSteps.Add((0, i, true));
                 Heapify(array, i, 0, sortSteps);
             }
         }
 
-        private void Heapify(int[] array, int n, int i, List<(int, int)> sortSteps)
+        private void Heapify(int[] array, int n, int i, List<(int, int, bool)> sortSteps)
         {
             int largest = i;
             int left = 2 * i + 1;
@@ -46,8 +46,12 @@ namespace Lab4.Task_1.Sorting_Algorithms
             if (largest != i)
             {
                 (array[i], array[largest]) = (array[largest], array[i]);
-                sortSteps.Add((i, largest));
+                sortSteps.Add((largest, i, true));
                 Heapify(array, n, largest, sortSteps);
+            }
+            else
+            {
+                sortSteps.Add((largest, i, false));
             }
         }
     }
