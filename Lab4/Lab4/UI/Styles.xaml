@@ -78,7 +78,7 @@
     
     <!-- Стиль для OutputTextBox -->
     <Style x:Key="OutputTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Height" Value="685" />
+        <Setter Property="Height" Value="785" />
         <Setter Property="Width" Value="765" /> 
         <Setter Property="FontFamily" Value="{StaticResource EuclidSquareRegular}" />
         <Setter Property="FontSize" Value="16" />

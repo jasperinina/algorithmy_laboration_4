@@ -23,10 +23,7 @@ namespace Lab4.Task_2
             _mainWindow = mainWindow;
             AddDynamicControls();
         }
-
-        /// <summary>
-        /// Добавляет динамические элементы управления на страницу.
-        /// </summary>
+        
         private void AddDynamicControls()
         {
             dynamicPanel = new StackPanel
@@ -56,6 +53,15 @@ namespace Lab4.Task_2
             sortMethodComboBox.Items.Add("Многопутевое слияние");
             sortMethodComboBox.SelectedIndex = 0;
 
+            // Заголовок выбора метода сортировки
+            TextBlock Header = new TextBlock
+            {
+                Text = "Введите данные для тестирования",
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Style = (Style)_mainWindow.FindResource("HeaderTextBlockStyle"),
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+            
             // Заголовок выбора файла
             TextBlock filePathTextBlock = new TextBlock
             {
@@ -117,7 +123,7 @@ namespace Lab4.Task_2
             filterValueComboBox = new ComboBox
             {
                 Width = 360,
-                Margin = new Thickness(0, 8, 0, 30),
+                Margin = new Thickness(0, 8, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Style = (Style)_mainWindow.FindResource("PopUp")
             };
@@ -135,7 +141,7 @@ namespace Lab4.Task_2
             secondaryAttributeComboBox = new ComboBox
             {
                 Width = 360,
-                Margin = new Thickness(0, 8, 0, 30),
+                Margin = new Thickness(0, 8, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Style = (Style)_mainWindow.FindResource("PopUp")
             };
@@ -146,15 +152,14 @@ namespace Lab4.Task_2
                 Content = "Запустить сортировку",
                 Width = 360,
                 HorizontalAlignment = HorizontalAlignment.Left,
-                Margin = new Thickness(0, 20, 0, 0),
+                Margin = new Thickness(0, 60, 0, 0),
                 Style = (Style)_mainWindow.FindResource("RoundedButtonStyle")
             };
             executeButton.Click += (s, e) => ExecuteSortButton_Click();
-            
 
-            // Добавление элементов управления на панель
             dynamicPanel.Children.Add(sortMethodHeader);
             dynamicPanel.Children.Add(sortMethodComboBox);
+            dynamicPanel.Children.Add(Header);
             dynamicPanel.Children.Add(filePathTextBlock);
             dynamicPanel.Children.Add(inputFilePathTextBox);
             dynamicPanel.Children.Add(browseFileButton);
@@ -168,10 +173,7 @@ namespace Lab4.Task_2
 
             _mainWindow.PageContentControl.Content = dynamicPanel;
         }
-
-        /// <summary>
-        /// Обрабатывает нажатие кнопки "Обзор" для выбора файла.
-        /// </summary>
+        
         private void BrowseFileButton_Click(TextBox inputFilePathTextBox)
         {
             var openFileDialog = new OpenFileDialog
@@ -220,10 +222,7 @@ namespace Lab4.Task_2
                 }
             }
         }
-
-        /// <summary>
-        /// Обрабатывает изменение выбранного атрибута фильтрации.
-        /// </summary>
+        
         private void FilterAttributeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (filterAttributeComboBox.SelectedItem == null || string.IsNullOrEmpty(inputFilePathTextBox.Text))
@@ -236,10 +235,7 @@ namespace Lab4.Task_2
 
             UpdateFilterValueComboBox(data, headers, selectedAttribute);
         }
-
-        /// <summary>
-        /// Обновляет комбобокс значений фильтрации на основе выбранного атрибута.
-        /// </summary>
+        
         private void UpdateFilterValueComboBox(List<string[]> data, string[] headers, string selectedAttribute)
         {
             int columnIndex = Array.IndexOf(headers, selectedAttribute);
@@ -252,10 +248,7 @@ namespace Lab4.Task_2
             if (uniqueValues.Count > 0)
                 filterValueComboBox.SelectedIndex = 0;
         }
-
-        /// <summary>
-        /// Обновляет комбобокс вторичных атрибутов, исключая выбранный атрибут фильтрации.
-        /// </summary>
+        
         private void UpdateSecondaryComboBox(string[] headers)
         {
             if (filterAttributeComboBox.SelectedItem == null)
@@ -277,10 +270,7 @@ namespace Lab4.Task_2
                 secondaryAttributeComboBox.SelectedIndex = 0;
             }
         }
-
-        /// <summary>
-        /// Обрабатывает нажатие кнопки "Запустить сортировку".
-        /// </summary>
+        
         private async void ExecuteSortButton_Click()
         {
             try
@@ -367,10 +357,7 @@ namespace Lab4.Task_2
                 MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        /// <summary>
-        /// Обновляет область вывода шагов сортировки.
-        /// </summary>
+        
         private void UpdateVisualization(string description)
         {
             OutputTextBox.AppendText($"{description}{Environment.NewLine}{Environment.NewLine}");
