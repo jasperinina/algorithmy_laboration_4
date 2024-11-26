@@ -3,25 +3,136 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:local="clr-namespace:Lab4.Task_3"
       mc:Ignorable="d"
-      Title="Task_2Page" Height="450" Width="800">
-    <Grid Background="White">
-        <Button x:Name="btForCountWordsForGeneratedText"  Content="Подсчет слов сгенерированного текста" HorizontalAlignment="Left" Margin="29,164,0,0" VerticalAlignment="Top" Height="39" Width="233" Click="btForCountWordsForGeneratedText_Click"/>
-        <Button x:Name="btForTest" Content="Замеры времени" HorizontalAlignment="Left" Margin="29,228,0,0" VerticalAlignment="Top" Height="44" Width="113" Click="btForTest_Click"/>
-        <Button x:Name="btForCountWordsForDoc" Content="Подсчет слов существующего текста" HorizontalAlignment="Left" Margin="29,294,0,0" VerticalAlignment="Top" Width="233" Height="40" Click="btForCountWordsForDoc_Click"/>
-        <TextBox x:Name="tBoxForLengthWords" HorizontalAlignment="Left" Margin="29,90,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="182" Height="42"/>
+      Title="Task_3Page"
+      Background="White">
 
-        <ScrollViewer HorizontalAlignment="Left" Height="133" Margin="452,24,0,0" VerticalAlignment="Top" Width="243">
-            <TextBox x:Name="tBoxForCountWords" Text="" IsReadOnly="True"/>
+    <Grid Background="White">
+        <!-- Заголовок страницы -->
+        <TextBlock Text="Сортировка текста" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Top" 
+                   FontSize="24" 
+                   Margin="0,20,0,0" 
+                   FontWeight="Bold"/>
+
+        <!-- Поле для ввода длины текста -->
+        <TextBlock Text="Введите количество слов для генерации текста:" 
+                   HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="30,80,0,0"/>
+        <TextBox x:Name="tBoxForLengthWords" 
+                 HorizontalAlignment="Left" 
+                 VerticalAlignment="Top" 
+                 Width="200" 
+                 Height="30" 
+                 Margin="30,110,0,0"/>
+
+        <!-- Кнопка для подсчета слов в сгенерированном тексте -->
+        <Button x:Name="btForCountWordsForGeneratedText" 
+                Content="Подсчет слов (генерация)" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Width="200" 
+                Height="30" 
+                Margin="30,150,0,0" 
+                Click="btForCountWordsForGeneratedText_Click"/>
+
+        <!-- Кнопка для подсчета слов в тексте из файла -->
+        <Button x:Name="btForCountWordsForDoc" 
+                Content="Подсчет слов (файл)" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Width="200" 
+                Height="30" 
+                Margin="30,200,0,0" 
+                Click="btForCountWordsForDoc_Click"/>
+
+        <!-- Кнопка для замеров времени -->
+        <Button x:Name="btForTest" 
+                Content="Замеры времени" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Width="200" 
+                Height="30" 
+                Margin="30,250,0,0" 
+                Click="btForTest_Click"/>
+
+        <!-- Выбор алгоритма сортировки -->
+        <TextBlock Text="Выберите алгоритм сортировки:" 
+                   HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="270,80,0,0"/>
+        <ComboBox x:Name="SortingAlgorithmComboBox" 
+                  HorizontalAlignment="Left" 
+                  VerticalAlignment="Top" 
+                  Width="200" 
+                  Height="30" 
+                  Margin="270,110,0,0">
+            <ComboBoxItem Content="QuickSort"/>
+            <ComboBoxItem Content="RadixSort"/>
+        </ComboBox>
+
+        <!-- Поле для выбора файла -->
+        <TextBlock Text="Выберите файл с текстом:" 
+                   HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="270,150,0,0"/>
+        <Button x:Name="btSelectFile" 
+                Content="Обзор" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Width="100" 
+                Height="30" 
+                Margin="270,180,0,0" 
+                Click="btBrowseFile_Click"/>
+
+        <TextBox x:Name="tBoxForFilePath" 
+                 HorizontalAlignment="Left" 
+                 VerticalAlignment="Top" 
+                 Width="200" 
+                 Height="30" 
+                 Margin="270,220,0,0" 
+                 IsReadOnly="True"/>
+
+        <!-- Поле для отображения результатов подсчета слов -->
+        <TextBlock Text="Результаты подсчета слов:" 
+                   HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="30,300,0,0"/>
+        <ScrollViewer HorizontalAlignment="Left" 
+                      VerticalAlignment="Top" 
+                      Margin="30,330,0,0" 
+                      Width="440" 
+                      Height="150">
+            <TextBox x:Name="tBoxForCountWords" 
+                     Text="" 
+                     IsReadOnly="True" 
+                     TextWrapping="Wrap"/>
         </ScrollViewer>
 
-        <ListView Name="DataListView" Width="349" Height="250" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,57,16">
+        <!-- Таблица для замеров времени -->
+        <TextBlock Text="Результаты замеров времени:" 
+                   HorizontalAlignment="Left" 
+                   VerticalAlignment="Top" 
+                   Margin="500,300,0,0"/>
+        <ListView x:Name="DataListView" 
+                  Width="400" 
+                  Height="180" 
+                  HorizontalAlignment="Left" 
+                  VerticalAlignment="Top" 
+                  Margin="500,330,0,0">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Количество слов" DisplayMemberBinding="{Binding WordCount}" Width="120"/>
-                    <GridViewColumn Header="QuickSort" DisplayMemberBinding="{Binding QuickSort}" Width="120"/>
-                    <GridViewColumn Header="RadixSort" DisplayMemberBinding="{Binding RadixSort}" Width="120"/>
+                    <GridViewColumn Header="Количество слов" 
+                                    DisplayMemberBinding="{Binding WordCount}" 
+                                    Width="120"/>
+                    <GridViewColumn Header="QuickSort" 
+                                    DisplayMemberBinding="{Binding QuickSort}" 
+                                    Width="120"/>
+                    <GridViewColumn Header="RadixSort" 
+                                    DisplayMemberBinding="{Binding RadixSort}" 
+                                    Width="120"/>
                 </GridView>
             </ListView.View>
         </ListView>

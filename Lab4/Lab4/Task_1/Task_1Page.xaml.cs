@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -310,7 +307,7 @@ namespace Lab4.Task_1
 
                 // Размещение метки под столбиком
                 Canvas.SetLeft(label, Spacing);
-                Canvas.SetBottom(label, 0); // Метка размещается непосредственно под столбиком
+                Canvas.SetBottom(label, 0);
                 Canvas.Children.Add(label);
                 labels.Add(label);
 
@@ -471,7 +468,6 @@ namespace Lab4.Task_1
                 shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
                 shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
 
-                // Ждем некоторое время, чтобы пользователь мог увидеть изменение цвета
                 await Task.Delay((int)Math.Round(1000 * (1 / Timeset)));
 
                 // Возвращаем цвет обратно на синий (#1F77B4)
