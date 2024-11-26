@@ -3,24 +3,34 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:local="clr-namespace:Lab4.Task_1"
       mc:Ignorable="d"
-      Title="Task_1Page" Height="450" Width="800" Loaded="Window_Loaded">
+      Title="Task_1Page" Height="900" Width="1200" Loaded="Window_Loaded">
+    
+    <Page.Resources>
+        <!-- Подключение внешнего файла стилей -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/UI/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+    
     <Grid>
-        <Canvas x:Name="Canvas" HorizontalAlignment="Left" VerticalAlignment="Top" Width="800" Height="320"/>
-        <Button x:Name="StartButton" Content="Старт" HorizontalAlignment="Left" Margin="10,360,0,0" VerticalAlignment="Top" Width="75" Click="StartButton_Click"/>
-        <Button x:Name="StopButton" Content="Стоп" HorizontalAlignment="Left" Margin="90,360,0,0" VerticalAlignment="Top" Width="75" Click="StopButton_Click"/>
-        <Button x:Name="NextButton" Content="Следующий шаг" HorizontalAlignment="Left" Margin="170,360,0,0" VerticalAlignment="Top" Width="75" Click="NextButton_Click"/>
-        <Button x:Name="BackButton" Content="Шаг назад" HorizontalAlignment="Left" Margin="250,360,0,0" VerticalAlignment="Top" Width="75" Click="BackButton_Click"/>
-        <Button x:Name="ResetButton" Content="Сбросить" HorizontalAlignment="Left" Margin="330,360,0,0" VerticalAlignment="Top" Width="75" Click="ResetButton_Click"/>
-        <ComboBox x:Name="SortingAlgorithmComboBox" HorizontalAlignment="Left" Margin="410,360,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="SortingAlgorithmComboBox_SelectionChanged">
-            <ComboBoxItem Tag="BubbleSort">Bubble Sort</ComboBoxItem>
-                <ComboBoxItem Tag="SelectionSort">Selection Sort</ComboBoxItem>
-                <ComboBoxItem Tag="QuickSort">Quick Sort</ComboBoxItem>
-                <ComboBoxItem Tag="HeapSort">Heap Sort</ComboBoxItem>
-            </ComboBox>
-        <TextBox x:Name="LogTextBox" HorizontalAlignment="Left" Height="35" Margin="10,390,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="780"/>
-        <Slider x:Name="TimeSetSlider" HorizontalAlignment="Left" Margin="540,330,0,0" VerticalAlignment="Top" Width="200" Minimum="0.5" Maximum="5" Value="1" ValueChanged="TimeSetSlider_ValueChanged"/>
-        <TextBlock x:Name="TimeSet" HorizontalAlignment="Left" Margin="540,360,0,0" VerticalAlignment="Top" Width="190" Text="Введите число действий в секунду"/>
+        <!-- Заголовок -->
+        <TextBlock Text="Шаги сортировки"
+                   Style="{StaticResource HeaderTextBlockStyle}"
+                   Margin="20,20,0,20"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Left"/>
+        
+        <Canvas x:Name="Canvas" Margin="20,50,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="1050" Height="320"/>
+        
+        <TextBox x:Name="LogTextBox" 
+                 HorizontalAlignment="Left" 
+                 Margin="20,400,0,0"
+                 Style="{StaticResource OutputTextBoxStyle}"
+                 Height="440"
+                 Width="1050"
+                 VerticalAlignment="Top"/>
     </Grid>
 </Page>

@@ -37,7 +37,7 @@ namespace Lab4.Task_2
                 Text = "Выберите метод сортировки",
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Style = (Style)_mainWindow.FindResource("HeaderTextBlockStyle"),
-                Margin = new Thickness(0, 0, 0, 5)
+                Margin = new Thickness(0, 0, 0, 0)
             };
 
             // Комбобокс для выбора метода сортировки
@@ -59,7 +59,7 @@ namespace Lab4.Task_2
                 Text = "Введите данные для тестирования",
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Style = (Style)_mainWindow.FindResource("HeaderTextBlockStyle"),
-                Margin = new Thickness(0, 0, 0, 5)
+                Margin = new Thickness(0, 0, 0, 0)
             };
             
             // Заголовок выбора файла
@@ -152,7 +152,7 @@ namespace Lab4.Task_2
                 Content = "Запустить сортировку",
                 Width = 360,
                 HorizontalAlignment = HorizontalAlignment.Left,
-                Margin = new Thickness(0, 60, 0, 0),
+                Margin = new Thickness(0, 67, 0, 0),
                 Style = (Style)_mainWindow.FindResource("RoundedButtonStyle")
             };
             executeButton.Click += (s, e) => ExecuteSortButton_Click();

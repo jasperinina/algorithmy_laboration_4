@@ -11,43 +11,28 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
     }
+
+    // Метод для очистки динамического контента
+    private void ClearDynamicContent()
+    {
+        PageContentControl.Content = null; // Очищаем содержимое контент-контрола
+    }
     
-    // Переход на страницу со стеком
     private void Task_1RadioButton_Checked(object sender, RoutedEventArgs e)
     {
-        // Очистить динамически добавленные элементы на текущей странице
-        /*
-        if (MainFrame.Content is StackPage stackPage)
-        {
-            stackPage.ClearDynamicElements();
-        }*/
-        
+        ClearDynamicContent();
         MainFrame.Navigate(new Task_1Page(this));
     }
 
-    // Переход на страницу с очередью
     private void Task_2RadioButton_Checked(object sender, RoutedEventArgs e)
     {
-        // Очистить динамически добавленные элементы на текущей странице
-        /*
-        if (MainFrame.Content is StackPage stackPage)
-        {
-            stackPage.ClearDynamicElements();
-        }*/
-        
+        ClearDynamicContent();
         MainFrame.Navigate(new Task_2Page(this));
     }
     
-    // Переход на страницу с алгоритмами
     private void Task_3RadioButton_Checked(object sender, RoutedEventArgs e)
     {
-        // Очистить динамически добавленные элементы на текущей странице
-        /*
-        if (MainFrame.Content is StackPage stackPage)
-        {
-            stackPage.ClearDynamicElements();
-        }*/
-            
+        ClearDynamicContent();
         MainFrame.Navigate(new Task_3Page(this));
     }
 }

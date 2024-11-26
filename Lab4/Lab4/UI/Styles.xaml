@@ -78,8 +78,6 @@
     
     <!-- Стиль для OutputTextBox -->
     <Style x:Key="OutputTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Height" Value="785" />
-        <Setter Property="Width" Value="765" /> 
         <Setter Property="FontFamily" Value="{StaticResource EuclidSquareRegular}" />
         <Setter Property="FontSize" Value="16" />
         <Setter Property="Padding" Value="10" />
@@ -181,6 +179,59 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
+    <!-- Стиль для кнопки стоп с закругленными углами --> 
+    <Style x:Key="RoundedButtonStopStyle" TargetType="Button">
+        <Setter Property="Height" Value="40" />
+        <Setter Property="FontFamily" Value="{StaticResource EuclidSquareSemiBoldBold}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="#B41F1F" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                            CornerRadius="10"  
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <!-- Стиль для кнопки шагов --> 
+    <Style x:Key="StepsButtonStyle" TargetType="Button">
+        <Setter Property="Height" Value="40" />
+        <Setter Property="FontFamily" Value="{StaticResource EuclidSquareSemiBoldBold}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+        <Setter Property="Background" Value="#000000" />
+        <Setter Property="BorderBrush" Value="#000000" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                            CornerRadius="10"  
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     
     <!-- Стиль для попап файла --> 
     <Style x:Key="PopUp" TargetType="ComboBox">
