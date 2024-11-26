@@ -30,7 +30,8 @@ namespace Lab4.Task_3
         // Парсинг текста (удаляет все символы, если это не пробел или не буква)
         private void ParseText(string text)
         {
-            string result = new string(text.Where(t => char.IsAsciiLetter(t) || t == ' ').ToArray());
+            string result = new string(text.Replace("\n", " ").Where(t => char.IsAsciiLetter(t) || t == ' ').ToArray());
+
             Text = result.ToLower();
         }
 
@@ -74,7 +75,10 @@ namespace Lab4.Task_3
             string result = string.Empty;
             foreach (var word in words)
             {
-                result += string.Format("{0}: {1} \n", word.Key, word.Value);
+                if (word.Key.Trim() != "")
+                {
+                    result += string.Format("{0}: {1} \n", word.Key, word.Value);
+                }
             }
 
             return result[..(result.Length - 2)];

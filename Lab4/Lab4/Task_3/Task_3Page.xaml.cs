@@ -69,7 +69,9 @@ public partial class Task_3Page : Page
         string path = tBoxForLengthWords.Text;
         TextHandler TH = new TextHandler(path);
         string text = TH.Text;
-        tBoxForCountWords.Text = TextHandler.CountWord(text.Split(" "));
+        RadixSort r = new RadixSort(text);
+        string[] sortedText = r.Text;
+        tBoxForCountWords.Text = "Текст отсортирован с помощью Radix сортировки\n" + TextHandler.CountWord(sortedText);
     }
 
     // Кнопка для подсчета слов для сгенерированного текста
@@ -77,6 +79,8 @@ public partial class Task_3Page : Page
     {
         int inputLengthText = Convert.ToInt32(tBoxForLengthWords.Text);
         string text = TextHandler.GenerateText(inputLengthText);
-        tBoxForCountWords.Text = TextHandler.CountWord(text.Split(" "));
+        RadixSort r = new RadixSort(text);
+        string[] sortedText = r.Text;
+        tBoxForCountWords.Text = "Текст отсортирован с помощью Radix сортировки\n" + TextHandler.CountWord(sortedText);
     }
 }
