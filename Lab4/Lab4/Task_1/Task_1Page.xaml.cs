@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -307,7 +311,7 @@ namespace Lab4.Task_1
 
                 // Размещение метки под столбиком
                 Canvas.SetLeft(label, Spacing);
-                Canvas.SetBottom(label, 0);
+                Canvas.SetBottom(label, 0); // Метка размещается непосредственно под столбиком
                 Canvas.Children.Add(label);
                 labels.Add(label);
 
@@ -430,8 +434,8 @@ namespace Lab4.Task_1
 
         private async Task SwapElements(Rectangle shape1, TextBlock label1, Rectangle shape2, TextBlock label2, bool shouldSwap)
         {
-            double height1 = Math.Round(shape1.Height * maxNumber / Canvas.ActualHeight * 0.95, 0);
-            double height2 = Math.Round(shape2.Height * maxNumber / Canvas.ActualHeight * 0.95, 0);
+            int index1 = rectangles.IndexOf(shape1);
+            int index2 = rectangles.IndexOf(shape2);
             if (shouldSwap)
             {
                 // Меняем цвет на зеленый перед анимацией (#1FB451)
@@ -446,8 +450,6 @@ namespace Lab4.Task_1
                 await AnimateSwap(shape1, label1, shape2, label2, shape2X, shape1X);
 
                 // Обмен элементов в списках
-                int index1 = rectangles.IndexOf(shape1);
-                int index2 = rectangles.IndexOf(shape2);
                 if (index1 != -1 && index2 != -1)
                 {
                     (rectangles[index1], rectangles[index2]) = (rectangles[index2], rectangles[index1]);
@@ -459,7 +461,7 @@ namespace Lab4.Task_1
                 shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
 
                 LogTextBox.Text +=
-                    $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {height1} и {height2}\n    • {height1} > {height2}\n\nМеняем местами\n\n";
+                    $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {labels[index2].Text} и {labels[index1].Text}\n    • {labels[index2].Text} > {labels[index1].Text}\n\nМеняем местами\n\n";
                 LogTextBox.ScrollToEnd();
             }
             else
@@ -468,13 +470,14 @@ namespace Lab4.Task_1
                 shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
                 shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
 
+                // Ждем некоторое время, чтобы пользователь мог увидеть изменение цвета
                 await Task.Delay((int)Math.Round(1000 * (1 / Timeset)));
 
                 // Возвращаем цвет обратно на синий (#1F77B4)
                 shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
                 shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
                 LogTextBox.Text +=
-                    $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {height1} и {height2}\n    • {height1} < {height2}\n\nОстаются на местах\n\n";
+                    $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {labels[index1].Text} и {labels[index2].Text}\n    • {labels[index1].Text} < {labels[index2].Text}\n\nОстаются на местах\n\n";
                 LogTextBox.ScrollToEnd();
             }
         }
