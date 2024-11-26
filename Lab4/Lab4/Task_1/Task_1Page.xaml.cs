@@ -482,8 +482,7 @@ namespace Lab4.Task_1
             }
         }
 
-        private async Task AnimateSwap(Rectangle rect1, TextBlock label1, Rectangle rect2, TextBlock label2,
-            double targetX1, double targetX2)
+        private async Task AnimateSwap(Rectangle rect1, TextBlock label1, Rectangle rect2, TextBlock label2, double targetX1, double targetX2)
         {
             double currentX1 = Canvas.GetLeft(rect1);
             double currentX2 = Canvas.GetLeft(rect2);

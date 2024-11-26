@@ -65,5 +65,5 @@ namespace Lab4.Task_3
                 Console.Write(Text[i] + " ");
             }
         }
-    }
+    }   
 }
