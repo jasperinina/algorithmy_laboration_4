@@ -1,0 +1,104 @@
+What is Programming? A Handbook for Beginners
+
+
+Did you know that computer programming is already a fundamental part of your everyday lives? Let's see why. I'm sure that you will be greatly surprised.
+
+Every time you turn on your smartphone, laptop, tablet, smart TV, or any other electronic device, you are running code that was planned, developed, and written by developers. This code creates the final and interactive result that you can see on your screen.
+
+That is exactly what programming is all about. It is the process of writing code to solve a particular problem or to implement a particular task.
+
+Programming is what allows your computer to run the programs you use every day and your smartphone to run the apps that you love. It is an essential part of our world as we know it.
+
+Whenever you check your calendar, attend virtual conferences, browse the web, or edit a document, you are using code that has been written by developers.
+
+"And what is code?" you may ask.
+
+Code is a sequence of instructions that a programmer writes to tell a device (like a computer) what to do.
+
+The device cannot know by itself how to handle a particular situation or how to perform a task. So developers are in charge of analyzing the situation and writing explicit instructions to implement what is needed.
+
+To do this, they follow a particular syntax (a set of rules for writing the code).
+
+A developer (or programmer) is the person who analyzes a problem and implements a solution in code.
+
+Sounds amazing, right? It's very powerful and you can be part this wonderful world too by learning how to code. Let's see how.
+
+You, as a developer.
+Let's put you in a developer's shoes for a moment. Imagine that you are developing a mobile app, like the ones that you probably have installed on your smartphone right now.
+
+What is the first thing that you would do?
+
+Think about this for a moment.
+
+The answer is...
+
+Analyzing the problem. What are you trying to build?
+
+As a developer, you would start by designing the layout of the app, how it will work, its different screens and functionality, and all the small details that will make your app an awesome tool for users around the world.
+
+Only after you have everything carefully planned out, you can start to write your code. To do that, you will need to choose a programming language to work with. Let's see what a programming language is and why they are super important.
+
+What is a Programing Language?
+
+
+
+Logos of popular programming languages.
+A programming language is a language that computers can understand.
+We cannot just write English words in our program like this:
+"Computer, solve this task!"
+and hope that our computer can understand what we mean. We need to follow certain rules to write the instructions.
+Every programming language has its own set of rules that determine if a line of code is valid or not. Because of this, the code you write in one programming language will be slightly different from others.
+💡 Tip: Some programming languages are more complex than others but most of them share core concepts and functionality. If you learn how to code in one programming language, you will likely be able to learn another one faster.
+Before you can start writing awesome programs and apps, you need to learn the basic rules of the programming language you chose for the task.
+💡 Tip: a program is a set of instructions written in a programming language for the computer to execute. We usually write the code for our program in one or multiple files.
+For example, this is a line of code in Python (a very popular programming language) that shows the message "Hello, World!":
+
+print("Hello, World!")
+
+But if we write the same line of code in JavaScript (a programming language mainly used for web development), we will get an error because it will not be valid.
+To do something very similar in JavaScript, we would write this line of code instead:
+console.log("Hello, World!");
+
+Visually, they look very different, right? This is because Python and JavaScript have a different syntax and a different set of built-in functions.
+💡 Tip: built-in functions are basically tasks that are already defined in the programming language. This lets us use them directly in our code by writing their names and by specifying the values they need.
+In our examples, **print()** is a built-in function in Python while **console.log()** is a function that we can use in JavaScript to see the message in the console (an interactive tool) if we run our code in the browser.
+Examples of programming languages include Python, JavaScript, TypeScript, Java, C, C#, C++, PHP, Go, Swift, SQL, and R. There are many programming languages and most of them can be used for many different purposes.
+💡 Tip: These were the most popular programming languages on the Stack Overflow Developer Survey 2022:
+ The 14 most popular programming languages among all respondents of the StackOverflow Developer Survey 2022. It's a yearly survey that collects information about popular technologies and trends in the developer community.
+There are many other programming languages (hundreds or even thousands!) but usually, you will learn and work with some of the most popular ones. Some of them have broader applications like Python and JavaScript while others (like R) have more specific (and even scientific) purposes.
+This sounds very interesting, right? And we are only starting to talk about programming languages. There is a lot to learn about them and I promise you that if you dive deeper into programming, your time and effort will be totally worth it.
+Awesome! Now that you know what programming is and what programming languages are all about, let's see how programming is related to binary numbers.
+🔹 Programming and Binary Numbers
+When you think about programming, perhaps the first thing that comes to your mind is something like the below image, right? A sequence of 0s and 1s on your computer.
+ Binary numbers are 0 and 1.
+Programming is indeed related to binary numbers ( 0 and 1) but in an indirect way. Developers do not actually write their code using zeros and ones.
+We usually write programs in a high-level programming language, a programming language with a syntax that recognizes specific words (called keywords), symbols, and values of different data types.
+Basically, we write code in a way that humans can understand.
+For example, these are the keywords that we can use in Python:
+False               class               from                or
+None                continue            global              pass
+True                def                 if                  raise
+and                 del                 import              return
+as                  elif                in                  try
+assert              else                is                  while
+async               except              lambda              with
+await               finally             nonlocal            yield
+break               for                 not
+
+Every programming language has its own set of keywords (words written in English). These keywords are part of the syntax and core functionality of the programming language.
+But keywords are just common words in English, almost like the ones that we would find in a book.
+That leads us to two very important questions:
+•	How does the computer understand and interpret what we are trying to say?
+•	Where does the binary number system come into play here?
+The computer does not understand these words, symbols, or values directly.
+When a program runs, the code that we write in a high-level programming language that humans can understand is automatically transformed into binary code that the computer can understand.
+ Process of transforming a program into binary code.
+This transformation of source code that humans can understand into binary code that the computer can understand is called compilation.
+According to Britannica, a compiler is defined as:
+Computer software that translates (compiles) source code written in a high-level language (e.g., C++) into a set of machine-language instructions that can be understood by a digital computer’s CPU.
+Britannica also mentions that:
+The term compiler was coined by American computer scientist Grace Hopper, who designed one of the first compilers in the early 1950s.
+Some programming languages can be classified as compiled programming languages while others can be classified as interpreted programming languages based on how to they are transformed into machine-language instructions.
+However, they all have to go through a process that converts them into instructions that the computer can understand.
+Awesome. Now you know why binary code is so important for computer science. Without it, basically programming would not exist because computers would not be able to understand our instructions.
+Now let's dive into the applications of programming and the different areas that you can explore.

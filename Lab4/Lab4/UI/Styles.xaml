@@ -15,7 +15,12 @@
                             <Ellipse x:Name="outerCircle" Width="24" Height="24" Stroke="#C3C3C3" StrokeThickness="1" Fill="#F5F5F5"/>
                             <Ellipse x:Name="innerCircle" Width="16" Height="16" Fill="#1F77B4" Visibility="Collapsed"/>
                         </Grid>
-                        <TextBlock Text="{TemplateBinding Content}" FontSize="16" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock 
+                            Text="{TemplateBinding Content}" 
+                            FontSize="16" 
+                            FontFamily="{StaticResource EuclidSquareRegular}" 
+                            Margin="10,0,0,0" 
+                            VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Триггеры для изменения состояния радиокнопки -->
@@ -100,7 +105,77 @@
         </Setter>
         <Setter Property="IsReadOnly" Value="True" />
     </Style>
-
+    
+    <Style x:Key="DataListViewStyle" TargetType="ListView">
+        <!-- Установка основных свойств для ListView -->
+        <Setter Property="FontFamily" Value="{StaticResource EuclidSquareRegular}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="BorderBrush" Value="#C3C3C3" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background" Value="#FFFFFF" />
+        <!-- Переопределение шаблона управления с включением необходимых частей -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListView}">
+                    <Border x:Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="10"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ScrollViewer"
+                                      Focusable="False"
+                                      Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <!-- Добавление GridViewHeaderRowPresenter для отображения заголовков -->
+                                <GridViewHeaderRowPresenter Grid.Row="0"
+                                                            Columns="{Binding Path=View.Columns, RelativeSource={RelativeSource TemplatedParent}}"
+                                                            ColumnHeaderContainerStyle="{TemplateBinding GridView.ColumnHeaderContainerStyle}"
+                                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                <!-- ItemsPresenter для отображения элементов списка -->
+                                <ItemsPresenter Grid.Row="1"
+                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </Grid>
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <!-- Стилизация заголовков столбцов GridView -->
+        <Setter Property="GridView.ColumnHeaderContainerStyle">
+            <Setter.Value>
+                <Style TargetType="{x:Type GridViewColumnHeader}">
+                    <!-- Установка шрифта и размера для заголовков -->
+                    <Setter Property="FontFamily" Value="{StaticResource EuclidSquareSemiBoldBold}" />
+                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="Background" Value="#FFFFFF" />
+                    <Setter Property="BorderBrush" Value="#C3C3C3" />
+                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    <Setter Property="Padding" Value="5" />
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <!-- Стилизация элементов списка -->
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <!-- Установка шрифта и размера для элементов списка -->
+                    <Setter Property="FontFamily" Value="{StaticResource EuclidSquareRegular}" />
+                    <Setter Property="FontSize" Value="16" />
+                    <Setter Property="Padding" Value="5" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                    <!-- Сохраняем стандартный шаблон для ListViewItem -->
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
     
     <!-- Стиль для кнопки с закругленными углами --> 
     <Style x:Key="RoundedButtonStyle" TargetType="Button">
