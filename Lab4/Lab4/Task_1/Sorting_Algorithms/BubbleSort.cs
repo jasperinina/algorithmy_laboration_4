@@ -8,7 +8,7 @@ namespace Lab4.Task_1.Sorting_Algorithms
 {
     public class BubbleSort : SortingAlgorithm
     {
-        public override void Sort(int[] array, List<(int, int, bool)> sortSteps)
+        public override void Sort(int[] array, List<(int, int, int)> sortSteps)
         {
             int n = array.Length;
             for (int i = 0; i < n - 1; i++)
@@ -20,7 +20,7 @@ namespace Lab4.Task_1.Sorting_Algorithms
                     {
                         (array[j], array[j + 1]) = (array[j + 1], array[j]);
                     }
-                    sortSteps.Add((j, j + 1, shouldSwap));
+                    sortSteps.Add((j, j + 1, shouldSwap ? 1 : 0));
                 }
             }
         }

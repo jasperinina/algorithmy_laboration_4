@@ -8,7 +8,7 @@ namespace Lab4.Task_1.Sorting_Algorithms
 {
     public class SelectionSort : SortingAlgorithm
     {
-        public override void Sort(int[] array, List<(int, int, bool)> sortSteps)
+        public override void Sort(int[] array, List<(int, int, int)> sortSteps)
         {
             int n = array.Length;
 
@@ -30,7 +30,7 @@ namespace Lab4.Task_1.Sorting_Algorithms
                 {
                     (array[i], array[minIndex]) = (array[minIndex], array[i]);
                 }
-                sortSteps.Add((i, minIndex, shouldSwap));
+                sortSteps.Add((i, minIndex, shouldSwap ? 1 : 0));
             }
         }
     }

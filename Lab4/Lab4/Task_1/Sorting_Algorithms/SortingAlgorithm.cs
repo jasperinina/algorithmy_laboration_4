@@ -9,6 +9,6 @@ namespace Lab4.Task_1.Sorting_Algorithms
     public abstract class SortingAlgorithm
     {
         // Базовый метод для сортировки массивов
-        public abstract void Sort(int[] array, List<(int, int, bool)> sortSteps);
+        public abstract void Sort(int[] array, List<(int, int, int)> sortSteps);
     }
 }

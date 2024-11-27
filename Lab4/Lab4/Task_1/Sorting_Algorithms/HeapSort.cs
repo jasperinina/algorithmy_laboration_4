@@ -8,50 +8,29 @@ namespace Lab4.Task_1.Sorting_Algorithms
 {
     public class HeapSort : SortingAlgorithm
     {
-        public override void Sort(int[] array, List<(int, int, bool)> sortSteps)
+        public override void Sort(int[] array, List<(int, int, int)> sortSteps)
         {
-            int n = array.Length;
-
-            // Build max heap
-            for (int i = n / 2 - 1; i >= 0; i--)
+            for (int n = array.Length - 1; n > 1; n--)
             {
-                Heapify(array, n, i, sortSteps);
-            }
-
-            // Extract elements from heap
-            for (int i = n - 1; i > 0; i--)
-            {
-                (array[0], array[i]) = (array[i], array[0]);
-                sortSteps.Add((0, i, true));
-                Heapify(array, i, 0, sortSteps);
+                BuildMaxHeap(array, n, sortSteps);
+                (array[0], array[n]) = (array[n], array[0]);
+                sortSteps.Add((0, n, 2));
             }
         }
-
-        private void Heapify(int[] array, int n, int i, List<(int, int, bool)> sortSteps)
+        public void BuildMaxHeap(int[] array, int last_index, List<(int, int, int)> sortSteps)
         {
-            int largest = i;
-            int left = 2 * i + 1;
-            int right = 2 * i + 2;
-
-            if (left < n && array[left] > array[largest])
+            for (int i = last_index; i > 0; i--)
             {
-                largest = left;
-            }
-
-            if (right < n && array[right] > array[largest])
-            {
-                largest = right;
-            }
-
-            if (largest != i)
-            {
-                (array[i], array[largest]) = (array[largest], array[i]);
-                sortSteps.Add((largest, i, true));
-                Heapify(array, n, largest, sortSteps);
-            }
-            else
-            {
-                sortSteps.Add((largest, i, false));
+                int parent_id = (i - 1) / 2;
+                if (array[i] > array[parent_id])
+                {
+                    (array[i], array[parent_id]) = (array[parent_id], array[i]);
+                    sortSteps.Add((i, parent_id, 3));
+                }
+                else
+                {
+                    sortSteps.Add((i, parent_id, 4));
+                }
             }
         }
     }
