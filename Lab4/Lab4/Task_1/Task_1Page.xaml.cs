@@ -14,7 +14,7 @@ namespace Lab4.Task_1
     {
         private MainWindow _mainWindow;
         private List<int> numbers;
-        private List<(int, int, int)> sortSteps;
+        private List<(int, int, int, string)> sortSteps;
         private List<Rectangle> rectangles;
         private List<TextBlock> labels; // Список для меток под столбиками
         private double RectangleWidth;
@@ -41,7 +41,7 @@ namespace Lab4.Task_1
 
             // Инициализация списков
             numbers = new List<int>();
-            sortSteps = new List<(int, int, int)>();
+            sortSteps = new List<(int, int, int, string)>();
             rectangles = new List<Rectangle>();
             labels = new List<TextBlock>();
         }
@@ -71,9 +71,9 @@ namespace Lab4.Task_1
                 Style = (Style)_mainWindow.FindResource("PopUp")
             };
             SortingAlgorithmComboBox.Items.Add("Пузырьковая сортировка");
-            SortingAlgorithmComboBox.Items.Add("Сортировка по выбору");
+            SortingAlgorithmComboBox.Items.Add("Сортировка выбором");
             SortingAlgorithmComboBox.Items.Add("Быстрая сортировка");
-            SortingAlgorithmComboBox.Items.Add("Сортировка по куче");
+            SortingAlgorithmComboBox.Items.Add("Пирамидальная сортировка");
             SortingAlgorithmComboBox.SelectedIndex = 0;
             SortingAlgorithmComboBox.SelectionChanged += SortingAlgorithmComboBox_SelectionChanged;
 
@@ -262,7 +262,7 @@ namespace Lab4.Task_1
         {
             // Очистка данных и канвы перед инициализацией
             numbers = dataGenerator.ArrayGenerate(arraySize, 50).ToList(); // Генерация нового массива
-            sortSteps = new List<(int, int, int)>();
+            sortSteps = new List<(int, int, int, string)>();
             rectangles = new List<Rectangle>();
             labels = new List<TextBlock>(); // Инициализация списка меток
             selectedSortingAlgorithm.Sort(numbers.ToArray(), sortSteps); // Создание шагов сортировки
@@ -348,7 +348,7 @@ namespace Lab4.Task_1
                 Rectangle rect2 = rectangles[step.Item2];
                 TextBlock label1 = labels[step.Item1];
                 TextBlock label2 = labels[step.Item2];
-                await SwapElements(rect1, label1, rect2, label2, step.Item3);
+                await SwapElements(rect1, label1, rect2, label2, step.Item3, step.Item4);
                 currentStepIndex++;
             }
         }
@@ -363,7 +363,7 @@ namespace Lab4.Task_1
                 Rectangle rect2 = rectangles[step.Item1];
                 TextBlock label1 = labels[step.Item2];
                 TextBlock label2 = labels[step.Item1];
-                await SwapElements(rect1, label1, rect2, label2, step.Item3);
+                await SwapElements(rect1, label1, rect2, label2, step.Item3, step.Item4);
             }
         }
 
@@ -400,13 +400,13 @@ namespace Lab4.Task_1
                 case "Пузырьковая сортировка":
                     selectedSortingAlgorithm = new BubbleSort();
                     break;
-                case "Сортировка по выбору":
+                case "Сортировка выбором":
                     selectedSortingAlgorithm = new SelectionSort();
                     break;
                 case "Быстрая сортировка":
                     selectedSortingAlgorithm = new QuickSort();
                     break;
-                case "Сортировка по куче":
+                case "Пирамидальная сортировка":
                     selectedSortingAlgorithm = new HeapSort();
                     break;
                 default:
@@ -431,7 +431,7 @@ namespace Lab4.Task_1
                 Rectangle rect2 = rectangles[step.Item2];
                 TextBlock label1 = labels[step.Item1];
                 TextBlock label2 = labels[step.Item2];
-                await SwapElements(rect1, label1, rect2, label2, step.Item3);
+                await SwapElements(rect1, label1, rect2, label2, step.Item3, step.Item4);
                 currentStepIndex++;
             }
 
@@ -448,8 +448,35 @@ namespace Lab4.Task_1
             LogTextBox.ScrollToEnd();
             await Task.Delay((int)Math.Round(1000 * (1 / Timeset)));
         }
+        private async Task SetOutQuickSortBounds()
+        {
+            foreach (var rect in rectangles)
+            {
+                rect.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+            }
+            await Application.Current.Dispatcher.InvokeAsync(() => { });
+        }
+        private async Task SetQuickSortBounds(string bounds)
+        {
+            var boundsParts = bounds.Split(' ');
+            int lowerBound = int.Parse(boundsParts[0]);
+            int upperBound = int.Parse(boundsParts[1]);
+            for (int i = 0; i < rectangles.Count; i++)
+            {
+                // Проверяем, находится ли индекс Rectangle в границах
+                if (i == upperBound)
+                {
+                    rectangles[i].Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C7C416"));
+                }
+                else if (i < lowerBound || i > upperBound)
+                {
+                    rectangles[i].Fill = Brushes.Gray;
+                }
+            }
+            await Application.Current.Dispatcher.InvokeAsync(() => { });
+        }
 
-        private async Task SwapElements(Rectangle shape1, TextBlock label1, Rectangle shape2, TextBlock label2, int shouldSwap)
+        private async Task SwapElements(Rectangle shape1, TextBlock label1, Rectangle shape2, TextBlock label2, int shouldSwap, string bounds)
         {
             var color1 = shape1.Fill;
             var color2 = shape2.Fill;
@@ -484,7 +511,7 @@ namespace Lab4.Task_1
                     LogTextBox.ScrollToEnd();
                     break;
                 case 2: // Heapsort : Max -> toend
-                    LogTextBox.Text += $"Шаг {currentStepIndex + 1} На данном этапе самый большой элемент {labels[index1].Text} хранится в корне кучи. Замените его на последний элемент кучи {labels[index2].Text}\n Поднимаем наибольший элемент снизу пирамиды";
+                    LogTextBox.Text += $"Шаг {currentStepIndex + 1} На данном этапе самый большой элемент {labels[index1].Text} хранится на вершине пирамиды\nЗаменим его на последний элемент пирамиды {labels[index2].Text}\nНачинаем поднимать новый наибольший элемент снизу пирамиды\n\n";
                     LogTextBox.ScrollToEnd();
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
                     shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
@@ -501,7 +528,7 @@ namespace Lab4.Task_1
                     }
                     break;
                 case 3: // Heapsort : true
-                    LogTextBox.Text += $"Шаг {currentStepIndex + 1} Сравниваем {labels[index1].Text} и его родителя {labels[index2].Text} с индексом (i-1)/2, {labels[index1].Text} > {labels[index2].Text} Меняем местами\n";
+                    LogTextBox.Text += $"Шаг {currentStepIndex + 1} Сравниваем {labels[index1].Text} и его родителя {labels[index2].Text} с индексом (i-1)/2, {labels[index1].Text} > {labels[index2].Text} Меняем местами\n\n";
                     LogTextBox.ScrollToEnd();
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
                     shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
@@ -518,7 +545,7 @@ namespace Lab4.Task_1
                     }
                     break;
                 case 4: // Heapsort : false
-                    LogTextBox.Text += $"Шаг {currentStepIndex + 1} Сравниваем {labels[index1].Text} и его родителя {labels[index2].Text} с индексом (i-1)/2, {labels[index1].Text} > {labels[index2].Text} Остаются на местах\n";
+                    LogTextBox.Text += $"Шаг {currentStepIndex + 1} Сравниваем {labels[index1].Text} и его родителя {labels[index2].Text} с индексом (i-1)/2, {labels[index1].Text} < {labels[index2].Text} Остаются на местах\n\n";
                     LogTextBox.ScrollToEnd();
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
                     shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
@@ -529,6 +556,9 @@ namespace Lab4.Task_1
                     shape2.Fill = color2;
                     break;
                 case 5: //SelectionSort : change min
+                    LogTextBox.Text +=
+                        $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {labels[index2].Text} и {labels[index1].Text}\n    • {labels[index1].Text} < {labels[index2].Text}\n\nМинимальным становится {labels[index1].Text}\n\n";
+                    LogTextBox.ScrollToEnd();
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
                     shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
 
@@ -537,13 +567,12 @@ namespace Lab4.Task_1
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C7C416"));
                     shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
 
-                    LogTextBox.Text +=
-                        $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {labels[index2].Text} и {labels[index1].Text}\n    • {labels[index1].Text} < {labels[index2].Text}\n\nМинимальным становится {labels[index1].Text}\n\n";
-                    LogTextBox.ScrollToEnd();
-
                     await Task.Delay((int)Math.Round(500 * (1 / Timeset)));
                     break;
                 case 6: //SelectionSort : skip min
+                    LogTextBox.Text +=
+                        $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {labels[index2].Text} и {labels[index1].Text}\n    • {labels[index2].Text} < {labels[index1].Text}\n\n Минимальным остаётся {labels[index2].Text}\n\n";
+                    LogTextBox.ScrollToEnd();
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
                     shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
 
@@ -551,12 +580,11 @@ namespace Lab4.Task_1
 
                     shape1.Fill = color1;
                     shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C7C416")); ;
-                    LogTextBox.Text +=
-                        $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {labels[index2].Text} и {labels[index1].Text}\n    • {labels[index2].Text} < {labels[index1].Text}\n\n Минимальным остаётся {labels[index2].Text}\n\n";
-                    LogTextBox.ScrollToEnd();
                     await Task.Delay((int)Math.Round(500 * (1 / Timeset)));
                     break;
                 case 7: //SelectionSort : min -> Toposition
+                    LogTextBox.Text += $"Шаг {currentStepIndex + 1}\n\nСтавим текущий минимальный элемент на своё место. Меняем {labels[index1].Text} и {labels[index2].Text}\n\n";
+                    LogTextBox.ScrollToEnd();
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
                     shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
 
@@ -570,19 +598,65 @@ namespace Lab4.Task_1
 
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
                     shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
-
-                    LogTextBox.Text += $"Ставим текущий минимальный элемент на своё место. Меняем {labels[index1].Text} и {labels[index2].Text}\n";
-                    LogTextBox.ScrollToEnd();
                     break;
                 case 8: //SelectionSort : min on position
+                    LogTextBox.Text += $"Шаг {currentStepIndex + 1}\n\nТекущий минимальный элемент {labels[index1].Text} был на своём месте\n\n";
+                    LogTextBox.ScrollToEnd();
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
 
                     await Task.Delay((int)Math.Round(1000 * (1 / Timeset)));
 
                     shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
-
-                    LogTextBox.Text += $"Текущий минимальный элемент {labels[index1].Text} был на своём месте\n";
+                    break;
+                case 9: // QuickSort pivotSwap
+                    LogTextBox.Text += $"Шаг {currentStepIndex + 1}\n\nМеняем местами {labels[index1].Text} и {labels[index2].Text}\nОпорный элемент {labels[index2].Text} на своём месте\n\n";
                     LogTextBox.ScrollToEnd();
+                    shape1.Fill = Brushes.Green;
+                    shape2.Fill = Brushes.Green;
+
+                    await AnimateSwap(shape1, label1, shape2, label2, shape2X, shape1X);
+
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+
+                    if (index1 != -1 && index2 != -1)
+                    {
+                        (rectangles[index1], rectangles[index2]) = (rectangles[index2], rectangles[index1]);
+                        (labels[index1], labels[index2]) = (labels[index2], labels[index1]);
+                    }
+                    await SetOutQuickSortBounds();
+                    break;
+                case 10: // QuickSort false
+                    LogTextBox.Text += $"Шаг {currentStepIndex + 1}\n\nСравниваем {labels[index1].Text} и Опорный элемент {labels[index2].Text}\n\n";
+                    LogTextBox.ScrollToEnd();
+                    await SetQuickSortBounds(bounds);
+                    await Task.Delay((int)Math.Round(500 * (1 / Timeset)));
+                    shape1.Fill = Brushes.Red;
+                    shape2.Fill = Brushes.Red;
+
+                    await Task.Delay((int)Math.Round(500 * (1 / Timeset)));
+
+                    shape1.Fill = color1;
+                    shape2.Fill = color2;
+                    break;
+                case 11: // QuickSort true
+                    await SetQuickSortBounds(bounds);
+                    LogTextBox.Text += $"Шаг {currentStepIndex + 1}\n\nМеняем местами {labels[index1].Text} и {labels[index2].Text}\n\n" +
+                        $"{labels[index2].Text} < опрного элемента, a {labels[index1].Text} первый элемент, который был больше опорного элемента.\n\n";
+                    LogTextBox.ScrollToEnd();
+                    shape1.Fill = Brushes.Green;
+                    shape2.Fill = Brushes.Green;
+
+                    await AnimateSwap(shape1, label1, shape2, label2, shape2X, shape1X);
+
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+
+                    if (index1 != -1 && index2 != -1)
+                    {
+                        (rectangles[index1], rectangles[index2]) = (rectangles[index2], rectangles[index1]);
+                        (labels[index1], labels[index2]) = (labels[index2], labels[index1]);
+                    }
                     break;
                 default: // BubbleSort : false
                     // Меняем цвет на красный, если не нужно менять местами (#B41F1F)
