@@ -476,8 +476,8 @@ namespace Lab4.Task_1
                     }
 
                     // Возвращаем цвет обратно на синий после анимации (#1F77B4)
-                    shape1.Fill = color2;
-                    shape2.Fill = color1;
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
 
                     LogTextBox.Text +=
                         $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {labels[index2].Text} и {labels[index1].Text}\n    • {labels[index2].Text} > {labels[index1].Text}\n\nМеняем местами\n\n";
@@ -486,8 +486,8 @@ namespace Lab4.Task_1
                 case 2: // Heapsort : Max -> toend
                     LogTextBox.Text += $"Шаг {currentStepIndex + 1} На данном этапе самый большой элемент {labels[index1].Text} хранится в корне кучи. Замените его на последний элемент кучи {labels[index2].Text}\n Поднимаем наибольший элемент снизу пирамиды";
                     LogTextBox.ScrollToEnd();
-                    shape1.Fill = Brushes.Green;
-                    shape2.Fill = Brushes.Green;
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
 
                     await AnimateSwap(shape2, label2, shape1, label1, shape1X, shape2X);
 
@@ -503,8 +503,8 @@ namespace Lab4.Task_1
                 case 3: // Heapsort : true
                     LogTextBox.Text += $"Шаг {currentStepIndex + 1} Сравниваем {labels[index1].Text} и его родителя {labels[index2].Text} с индексом (i-1)/2, {labels[index1].Text} > {labels[index2].Text} Меняем местами\n";
                     LogTextBox.ScrollToEnd();
-                    shape1.Fill = Brushes.Green;
-                    shape2.Fill = Brushes.Green;
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
 
                     await AnimateSwap(shape1, label1, shape2, label2, shape2X, shape1X);
 
@@ -527,6 +527,62 @@ namespace Lab4.Task_1
 
                     shape1.Fill = color1;
                     shape2.Fill = color2;
+                    break;
+                case 5: //SelectionSort : change min
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
+
+                    await Task.Delay((int)Math.Round(500 * (1 / Timeset)));
+
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C7C416"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+
+                    LogTextBox.Text +=
+                        $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {labels[index2].Text} и {labels[index1].Text}\n    • {labels[index1].Text} < {labels[index2].Text}\n\nМинимальным становится {labels[index1].Text}\n\n";
+                    LogTextBox.ScrollToEnd();
+
+                    await Task.Delay((int)Math.Round(500 * (1 / Timeset)));
+                    break;
+                case 6: //SelectionSort : skip min
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
+
+                    await Task.Delay((int)Math.Round(500 * (1 / Timeset)));
+
+                    shape1.Fill = color1;
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C7C416")); ;
+                    LogTextBox.Text +=
+                        $"Шаг {currentStepIndex + 1}\n\n[Сравнение]\n    • {labels[index2].Text} и {labels[index1].Text}\n    • {labels[index2].Text} < {labels[index1].Text}\n\n Минимальным остаётся {labels[index2].Text}\n\n";
+                    LogTextBox.ScrollToEnd();
+                    await Task.Delay((int)Math.Round(500 * (1 / Timeset)));
+                    break;
+                case 7: //SelectionSort : min -> Toposition
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1FB451"));
+
+                    await AnimateSwap(shape1, label1, shape2, label2, shape2X, shape1X);
+
+                    if (index1 != -1 && index2 != -1)
+                    {
+                        (rectangles[index1], rectangles[index2]) = (rectangles[index2], rectangles[index1]);
+                        (labels[index1], labels[index2]) = (labels[index2], labels[index1]);
+                    }
+
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+                    shape2.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+
+                    LogTextBox.Text += $"Ставим текущий минимальный элемент на своё место. Меняем {labels[index1].Text} и {labels[index2].Text}\n";
+                    LogTextBox.ScrollToEnd();
+                    break;
+                case 8: //SelectionSort : min on position
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B41F1F"));
+
+                    await Task.Delay((int)Math.Round(1000 * (1 / Timeset)));
+
+                    shape1.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1F77B4"));
+
+                    LogTextBox.Text += $"Текущий минимальный элемент {labels[index1].Text} был на своём месте\n";
+                    LogTextBox.ScrollToEnd();
                     break;
                 default: // BubbleSort : false
                     // Меняем цвет на красный, если не нужно менять местами (#B41F1F)
