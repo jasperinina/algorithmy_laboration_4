@@ -18,11 +18,7 @@ namespace Lab4.Task_2
             _workingDirectory = AppDomain.CurrentDomain.BaseDirectory; // Текущая рабочая директория
         }
 
-        public void Sort(
-            string sortMethod,
-            int filterKeyIndex,
-            string filterKeyValue,
-            int secondaryKeyIndex,
+        public void Sort(string sortMethod, int filterKeyIndex, string filterKeyValue, int secondaryKeyIndex,
             IProgress<string> progress)
         {
             // Отступы для визуального восприятия
@@ -52,13 +48,16 @@ namespace Lab4.Task_2
                 switch (sortMethod)
                 {
                     case "Прямое слияние":
-                        tempFiles = SplitDataForDirectMergeSort(filteredData, secondaryKeyIndex, isNumeric, progress, indentLevel2);
+                        tempFiles = SplitDataForDirectMergeSort(filteredData, secondaryKeyIndex, isNumeric, progress,
+                            indentLevel2);
                         break;
                     case "Естественное слияние":
-                        tempFiles = SplitDataForNaturalMergeSort(filteredData, secondaryKeyIndex, isNumeric, progress, indentLevel2);
+                        tempFiles = SplitDataForNaturalMergeSort(filteredData, secondaryKeyIndex, isNumeric, progress,
+                            indentLevel2);
                         break;
                     case "Многопутевое слияние":
-                        tempFiles = SplitDataForMultiwayMergeSort(filteredData, secondaryKeyIndex, isNumeric, progress, indentLevel2);
+                        tempFiles = SplitDataForMultiwayMergeSort(filteredData, secondaryKeyIndex, isNumeric, progress,
+                            indentLevel2);
                         break;
                     default:
                         throw new NotSupportedException($"Метод сортировки \"{sortMethod}\" не поддерживается.");
@@ -68,9 +67,12 @@ namespace Lab4.Task_2
                 progress?.Report($"3. [Сортировка методом \"{sortMethod}\"]");
                 string resultFile = sortMethod switch
                 {
-                    "Прямое слияние" => PerformDirectMergeSort(tempFiles, secondaryKeyIndex, isNumeric, progress, indentLevel2),
-                    "Естественное слияние" => PerformNaturalMergeSort(tempFiles, secondaryKeyIndex, isNumeric, progress, indentLevel2),
-                    "Многопутевое слияние" => PerformMultiwayMergeSort(tempFiles, secondaryKeyIndex, isNumeric, progress, indentLevel2),
+                    "Прямое слияние" => PerformDirectMergeSort(tempFiles, secondaryKeyIndex, isNumeric, progress,
+                        indentLevel2),
+                    "Естественное слияние" => PerformNaturalMergeSort(tempFiles, secondaryKeyIndex, isNumeric, progress,
+                        indentLevel2),
+                    "Многопутевое слияние" => PerformMultiwayMergeSort(tempFiles, secondaryKeyIndex, isNumeric,
+                        progress, indentLevel2),
                     _ => throw new NotSupportedException($"Метод сортировки \"{sortMethod}\" не поддерживается.")
                 };
 
@@ -81,6 +83,7 @@ namespace Lab4.Task_2
                 {
                     File.Delete(finalResultFile); // Удаляем существующий файл
                 }
+
                 File.Move(resultFile, finalResultFile);
 
                 progress?.Report($"{indentLevel2}• Результат записан в файл: {Path.GetFileName(finalResultFile)}");
@@ -99,7 +102,8 @@ namespace Lab4.Task_2
             }
         }
 
-        private List<string> FilterData(int filterKeyIndex, string filterKeyValue, IProgress<string> progress, string indent)
+        private List<string> FilterData(int filterKeyIndex, string filterKeyValue, IProgress<string> progress,
+            string indent)
         {
             var data = _fileHandler.ReadFromFile();
             var filteredData = data.Skip(1) // Пропускаем заголовок
@@ -137,50 +141,41 @@ namespace Lab4.Task_2
         }
 
         // Метод для прямого слияния
-        private List<string> SplitDataForDirectMergeSort(List<string> data, int secondaryKeyIndex, bool isNumeric, IProgress<string> progress, string indent)
+        private List<string> SplitDataForDirectMergeSort(List<string> data, int secondaryKeyIndex, bool isNumeric,
+            IProgress<string> progress, string indent)
         {
             var tempFiles = new List<string>();
-            var evenLines = new List<string>();
-            var oddLines = new List<string>();
+            var fileA = GetTempFileName();
+            var fileB = GetTempFileName();
 
-            for (int i = 1; i < data.Count; i++)
+            using (var writerA = new StreamWriter(fileA))
+            using (var writerB = new StreamWriter(fileB))
             {
-                if ((i % 2) == 0)
+                for (int i = 1; i < data.Count; i++)
                 {
-                    evenLines.Add(data[i]);
-                }
-                else
-                {
-                    oddLines.Add(data[i]);
+                    if ((i % 2) == 0)
+                    {
+                        writerA.WriteLine(data[i]);
+                    }
+                    else
+                    {
+                        writerB.WriteLine(data[i]);
+                    }
                 }
             }
 
-            // Сортировка каждого файла
-            evenLines.Sort((line1, line2) =>
-            {
-                return CompareLines(line1, line2, secondaryKeyIndex, isNumeric);
-            });
+            tempFiles.Add(fileA);
+            tempFiles.Add(fileB);
 
-            oddLines.Sort((line1, line2) =>
-            {
-                return CompareLines(line1, line2, secondaryKeyIndex, isNumeric);
-            });
-
-            var tempFileEven = GetTempFileName();
-            File.WriteAllLines(tempFileEven, evenLines);
-            tempFiles.Add(tempFileEven);
-            progress?.Report($"{indent}• Создан временный файл для четных индексов: {Path.GetFileName(tempFileEven)} (элементов: {evenLines.Count})");
-
-            var tempFileOdd = GetTempFileName();
-            File.WriteAllLines(tempFileOdd, oddLines);
-            tempFiles.Add(tempFileOdd);
-            progress?.Report($"{indent}• Создан временный файл для нечетных индексов: {Path.GetFileName(tempFileOdd)} (элементов: {oddLines.Count})");
+            progress?.Report(
+                $"{indent}• Созданы временные файлы: {Path.GetFileName(fileA)} (для нечетных индексов) и {Path.GetFileName(fileB)} (для четных индексов)");
 
             return tempFiles;
         }
 
         // Метод для естественного слияния
-        private List<string> SplitDataForNaturalMergeSort(List<string> data, int secondaryKeyIndex, bool isNumeric, IProgress<string> progress, string indent)
+        private List<string> SplitDataForNaturalMergeSort(List<string> data, int secondaryKeyIndex, bool isNumeric,
+            IProgress<string> progress, string indent)
         {
             var tempFiles = new List<string>();
             if (data.Count <= 1) return tempFiles;
@@ -205,7 +200,8 @@ namespace Lab4.Task_2
                     var tempFile = GetTempFileName();
                     File.WriteAllLines(tempFile, currentBlock);
                     tempFiles.Add(tempFile);
-                    progress?.Report($"{indent}    - Создан временный файл для естественного блока: {Path.GetFileName(tempFile)} (элементов: {currentBlock.Count})");
+                    progress?.Report(
+                        $"{indent}    - Создан временный файл для естественного блока: {Path.GetFileName(tempFile)} (элементов: {currentBlock.Count})");
                     currentBlock = new List<string> { data[i] };
                 }
 
@@ -218,7 +214,8 @@ namespace Lab4.Task_2
                 var tempFile = GetTempFileName();
                 File.WriteAllLines(tempFile, currentBlock);
                 tempFiles.Add(tempFile);
-                progress?.Report($"{indent}    - Создан временный файл для естественного блока: {Path.GetFileName(tempFile)} (элементов: {currentBlock.Count})");
+                progress?.Report(
+                    $"{indent}    - Создан временный файл для естественного блока: {Path.GetFileName(tempFile)} (элементов: {currentBlock.Count})");
             }
 
             progress?.Report($"{indent}• Разбиение на естественные блоки завершено. Всего блоков: {tempFiles.Count}");
@@ -226,7 +223,8 @@ namespace Lab4.Task_2
         }
 
         // Метод для многопутевого слияния
-        private List<string> SplitDataForMultiwayMergeSort(List<string> data, int secondaryKeyIndex, bool isNumeric, IProgress<string> progress, string indent)
+        private List<string> SplitDataForMultiwayMergeSort(List<string> data, int secondaryKeyIndex, bool isNumeric,
+            IProgress<string> progress, string indent)
         {
             var tempFiles = new List<string>();
             int chunkSize = 1; // Каждый элемент становится отдельным блоком
@@ -237,69 +235,210 @@ namespace Lab4.Task_2
 
                 // Сортируем каждый блок
                 progress?.Report($"{indent}• Сортировка блока размером {chunkSize} элементов.");
-                chunk.Sort((line1, line2) =>
-                {
-                    return CompareLines(line1, line2, secondaryKeyIndex, isNumeric);
-                });
+                chunk.Sort((line1, line2) => { return CompareLines(line1, line2, secondaryKeyIndex, isNumeric); });
 
                 var tempFile = GetTempFileName();
                 File.WriteAllLines(tempFile, chunk);
                 tempFiles.Add(tempFile);
 
-                progress?.Report($"{indent}• Создан временный файл для блока: {Path.GetFileName(tempFile)} (элементов: {chunk.Count})");
+                progress?.Report(
+                    $"{indent}• Создан временный файл для блока: {Path.GetFileName(tempFile)} (элементов: {chunk.Count})");
             }
 
             return tempFiles;
         }
 
-        // Метод для прямого слияния
-        private string PerformDirectMergeSort(List<string> tempFiles, int secondaryKeyIndex, bool isNumeric, IProgress<string> progress, string indent)
+        // Методы для прямого слияния
+        private string PerformDirectMergeSort(List<string> tempFiles, int secondaryKeyIndex, bool isNumeric,
+            IProgress<string> progress, string indent)
         {
+            string fileA = tempFiles[0];
+            string fileB = tempFiles[1];
+            string fileC = GetTempFileName(); // Выходной файл
+
+            int runLength = 1;
+            bool sorted = false;
             int step = 1;
-            while (tempFiles.Count > 1)
+
+            while (!sorted)
             {
-                progress?.Report($"{indent}• [Слияние пар блоков]");
-                var mergedFiles = new List<string>();
-                var filesToDelete = new List<string>();
+                progress?.Report($"{indent}• Шаг {step}: Начало цикла с длиной серии: {runLength}");
 
-                for (int i = 0; i < tempFiles.Count; i += 2)
+                int mergeCount = 0; // Количество слияний в этом проходе
+
+                // Фаза слияния
+                using (var readerA = new StreamReader(fileA))
+                using (var readerB = new StreamReader(fileB))
+                using (var writerC = new StreamWriter(fileC))
                 {
-                    if (i + 1 < tempFiles.Count)
-                    {
-                        progress?.Report($"{indent}    - Слияние файлов: {Path.GetFileName(tempFiles[i])} и {Path.GetFileName(tempFiles[i + 1])}");
-                        var mergedFile = MergeFiles(tempFiles[i], tempFiles[i + 1], secondaryKeyIndex, isNumeric, progress, indent);
-                        mergedFiles.Add(mergedFile);
+                    bool hasDataA = !readerA.EndOfStream;
+                    bool hasDataB = !readerB.EndOfStream;
 
-                        //progress?.Report($"{indent}    Результат слияния: {Path.GetFileName(mergedFile)}");
-
-                        // Добавляем исходные файлы в список для удаления
-                        filesToDelete.Add(tempFiles[i]);
-                        filesToDelete.Add(tempFiles[i + 1]);
-                    }
-                    else
+                    while (hasDataA || hasDataB)
                     {
-                        mergedFiles.Add(tempFiles[i]);
-                        progress?.Report($"{indent}    - Оставшийся файл без пары: {Path.GetFileName(tempFiles[i])}");
-                        // Не удаляем tempFiles[i], так как он не был слит
+                        mergeCount++;
+
+                        // Чтение серий из fileA и fileB
+                        var runA = ReadRun(readerA, runLength, ref hasDataA);
+                        var runB = ReadRun(readerB, runLength, ref hasDataB);
+
+                        progress?.Report(
+                            $"{indent}     - Слияние серии {mergeCount}: серии длиной {runA.Count} из {Path.GetFileName(fileA)} и серии длиной {runB.Count} из {Path.GetFileName(fileB)}");
+
+                        // Слияние серий и запись в fileC
+                        MergeRuns(runA, runB, writerC, secondaryKeyIndex, isNumeric, progress, indent,
+                            Path.GetFileName(fileA), Path.GetFileName(fileB));
                     }
                 }
 
-                // Удаляем только те файлы, которые были использованы в слиянии
-                foreach (var file in filesToDelete)
+                progress?.Report($"{indent}• Завершено слияние. Количество слияний в этом проходе: {mergeCount}");
+
+                // Проверка, завершена ли сортировка
+                sorted = (mergeCount <= 1);
+
+                if (sorted)
                 {
-                    File.Delete(file);
-                    progress?.Report($"{indent}• Удален временный файл: {Path.GetFileName(file)}");
+                    progress?.Report($"{indent}• Сортировка завершена.");
+                    break;
                 }
 
-                tempFiles = mergedFiles;
+                // Подготовка к следующему проходу
+                runLength *= 2;
+
+                // Удаление старых файлов и подготовка к следующему циклу
+                File.Delete(fileA);
+                File.Delete(fileB);
+
+                // Разделение fileC обратно на fileA и fileB
+                var newFileA = GetTempFileName();
+                var newFileB = GetTempFileName();
+                SplitFileForNextPass(fileC, newFileA, newFileB, runLength, progress, indent);
+
+                // Подготовка fileC для следующего слияния
+                File.Delete(fileC);
+                fileC = GetTempFileName();
+
+                fileA = newFileA;
+                fileB = newFileB;
+
                 step++;
             }
 
-            return tempFiles[0];
+            // Очистка и возврат отсортированного файла
+            File.Delete(fileA);
+            File.Delete(fileB);
+
+            return fileC;
+        }
+
+        private Queue<string> ReadRun(StreamReader reader, int runLength, ref bool hasData)
+        {
+            var run = new Queue<string>();
+            int count = 0;
+
+            while (count < runLength && hasData)
+            {
+                var line = reader.ReadLine();
+                if (line != null)
+                {
+                    run.Enqueue(line);
+                    count++;
+                }
+
+                hasData = !reader.EndOfStream;
+            }
+
+            return run;
+        }
+
+        private void MergeRuns(Queue<string> runA, Queue<string> runB, StreamWriter writer, int secondaryKeyIndex,
+            bool isNumeric, IProgress<string> progress, string indent, string fileAName, string fileBName)
+        {
+            int comparisonStep = 1;
+            while (runA.Count > 0 && runB.Count > 0)
+            {
+                var itemA = runA.Peek();
+                var itemB = runB.Peek();
+                int compareResult = CompareLines(itemA, itemB, secondaryKeyIndex, isNumeric);
+
+                progress?.Report(
+                    $"{indent}• [Cравнение]\n\n             - \"{GetKeyValue(itemA, secondaryKeyIndex, isNumeric)}\" (из серии {fileAName}) с \"{GetKeyValue(itemB, secondaryKeyIndex, isNumeric)}\" (из серии {fileBName})");
+
+                if (compareResult <= 0)
+                {
+                    // Выбор элемента из серии A
+                    progress?.Report(
+                        $"{indent}         → Так как \"{GetKeyValue(itemA, secondaryKeyIndex, isNumeric)}\" < \"{GetKeyValue(itemB, secondaryKeyIndex, isNumeric)}\"\n                     добавляем \"{itemA}\" из серии {fileAName} в результирующий файл.");
+                    writer.WriteLine(runA.Dequeue());
+                }
+                else
+                {
+                    // Выбор элемента из серии B
+                    progress?.Report(
+                        $"{indent}         → Так как \"{GetKeyValue(itemA, secondaryKeyIndex, isNumeric)}\" > \"{GetKeyValue(itemB, secondaryKeyIndex, isNumeric)}\"\n                     добавляем \"{itemB}\" из серии {fileBName} в результирующий файл.");
+                    writer.WriteLine(runB.Dequeue());
+                }
+
+                comparisonStep++;
+            }
+
+            // Добавляем оставшиеся элементы из серии A
+            while (runA.Count > 0)
+            {
+                var itemA = runA.Dequeue();
+                progress?.Report(
+                    $"{indent}     - Добавление оставшегося элемента \"{itemA}\" из серии {fileAName} во временный результирующий файл.");
+                writer.WriteLine(itemA);
+            }
+
+            // Добавляем оставшиеся элементы из серии B
+            while (runB.Count > 0)
+            {
+                var itemB = runB.Dequeue();
+                progress?.Report(
+                    $"{indent}     - Добавление оставшегося элемента \"{itemB}\" из серии {fileBName} во временный результирующий файл.");
+                writer.WriteLine(itemB);
+            }
+        }
+
+        private void SplitFileForNextPass(string sourceFile, string destFileA, string destFileB, int runLength,
+            IProgress<string> progress, string indent)
+        {
+            using (var reader = new StreamReader(sourceFile))
+            using (var writerA = new StreamWriter(destFileA))
+            using (var writerB = new StreamWriter(destFileB))
+            {
+                bool writeToA = true;
+                int runCount = 0;
+                while (!reader.EndOfStream)
+                {
+                    runCount++;
+                    progress?.Report(
+                        $"{indent}    - Разделение серии {runCount} в файл {(writeToA ? Path.GetFileName(destFileA) : Path.GetFileName(destFileB))}");
+
+                    for (int i = 0; i < runLength && !reader.EndOfStream; i++)
+                    {
+                        var line = reader.ReadLine();
+                        if (writeToA)
+                        {
+                            writerA.WriteLine(line);
+                        }
+                        else
+                        {
+                            writerB.WriteLine(line);
+                        }
+                    }
+
+                    writeToA = !writeToA;
+                }
+            }
+
+            progress?.Report($"{indent}• Файл {Path.GetFileName(sourceFile)} разделен для следующего прохода.");
         }
 
         // Метод для естественного слияния
-        private string PerformNaturalMergeSort(List<string> tempFiles, int secondaryKeyIndex, bool isNumeric, IProgress<string> progress, string indent)
+        private string PerformNaturalMergeSort(List<string> tempFiles, int secondaryKeyIndex, bool isNumeric,
+            IProgress<string> progress, string indent)
         {
             int step = 1;
             while (tempFiles.Count > 1)
@@ -312,8 +451,10 @@ namespace Lab4.Task_2
                 {
                     if (i + 1 < tempFiles.Count)
                     {
-                        progress?.Report($"{indent}    - Слияние файлов: {Path.GetFileName(tempFiles[i])} и {Path.GetFileName(tempFiles[i + 1])}");
-                        var mergedFile = MergeFiles(tempFiles[i], tempFiles[i + 1], secondaryKeyIndex, isNumeric, progress, indent);
+                        progress?.Report(
+                            $"{indent}    - Слияние файлов: {Path.GetFileName(tempFiles[i])} и {Path.GetFileName(tempFiles[i + 1])}");
+                        var mergedFile = MergeFiles(tempFiles[i], tempFiles[i + 1], secondaryKeyIndex, isNumeric,
+                            progress, indent);
                         mergedFiles.Add(mergedFile);
 
                         //progress?.Report($"{indent}    Результат слияния: {Path.GetFileName(mergedFile)}");
@@ -344,7 +485,8 @@ namespace Lab4.Task_2
             // Возвращаем финальный временный файл без перемещения
             if (tempFiles.Count == 1)
             {
-                progress?.Report($"{indent}• Естественное слияние завершено. Финальный временный файл: {Path.GetFileName(tempFiles[0])}");
+                progress?.Report(
+                    $"{indent}• Естественное слияние завершено. Финальный временный файл: {Path.GetFileName(tempFiles[0])}");
                 return tempFiles[0];
             }
 
@@ -352,7 +494,8 @@ namespace Lab4.Task_2
         }
 
         // Метод для многопутевого слияния
-        private string PerformMultiwayMergeSort(List<string> tempFiles, int secondaryKeyIndex, bool isNumeric, IProgress<string> progress, string indent)
+        private string PerformMultiwayMergeSort(List<string> tempFiles, int secondaryKeyIndex, bool isNumeric,
+            IProgress<string> progress, string indent)
         {
             progress?.Report($"{indent}• [Многопутевое слияние блоков]");
             string resultFile = GetTempFileName();
@@ -367,7 +510,8 @@ namespace Lab4.Task_2
                 if (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    buffer.Add((line, reader, Path.GetFileName(reader.BaseStream is FileStream fs ? fs.Name : "Unknown")));
+                    buffer.Add((line, reader,
+                        Path.GetFileName(reader.BaseStream is FileStream fs ? fs.Name : "Unknown")));
                 }
             }
 
@@ -393,7 +537,8 @@ namespace Lab4.Task_2
                 // Находим минимальный элемент
                 var minItem = currentItems.OrderBy(x => x.key, new DynamicKeyComparer(isNumeric)).First();
 
-                progress?.Report($"{indent}    - Выбор: \"{minItem.line}\" из {minItem.fileName} добавляется в результирующий файл.");
+                progress?.Report(
+                    $"{indent}    - Выбор: \"{minItem.line}\" из {minItem.fileName} добавляется в результирующий файл.");
                 writer.WriteLine(minItem.line);
 
                 // Обновляем буфер
@@ -426,7 +571,8 @@ namespace Lab4.Task_2
             return resultFile;
         }
 
-        private string MergeFiles(string file1, string file2, int secondaryKeyIndex, bool isNumeric, IProgress<string> progress, string indent)
+        private string MergeFiles(string file1, string file2, int secondaryKeyIndex, bool isNumeric,
+            IProgress<string> progress, string indent)
         {
             var tempFile = GetTempFileName();
             using var reader1 = new StreamReader(file1);
@@ -436,29 +582,33 @@ namespace Lab4.Task_2
             string line1 = reader1.ReadLine();
             string line2 = reader2.ReadLine();
 
-            progress?.Report($"{indent}• [Сравнение элементов из файлов {Path.GetFileName(file1)} и {Path.GetFileName(file2)}]");
+            progress?.Report(
+                $"{indent}• [Сравнение элементов из файлов {Path.GetFileName(file1)} и {Path.GetFileName(file2)}]");
             int comparisonStep = 1;
             while (line1 != null && line2 != null)
             {
                 int comparison = CompareLines(line1, line2, secondaryKeyIndex, isNumeric);
 
-                progress?.Report($"{indent}    - Шаг {comparisonStep}: Сравниваем \"{GetKeyValue(line1, secondaryKeyIndex, isNumeric)}\" " +
-                                  $"(из {Path.GetFileName(file1)}) с \"{GetKeyValue(line2, secondaryKeyIndex, isNumeric)}\" " +
-                                  $"(из {Path.GetFileName(file2)})");
+                progress?.Report(
+                    $"{indent}    - Шаг {comparisonStep}: Сравниваем \"{GetKeyValue(line1, secondaryKeyIndex, isNumeric)}\" " +
+                    $"(из {Path.GetFileName(file1)}) с \"{GetKeyValue(line2, secondaryKeyIndex, isNumeric)}\" " +
+                    $"(из {Path.GetFileName(file2)})");
 
                 if (comparison <= 0)
                 {
                     // Выбор элемента из первого файла
-                    progress?.Report($"{indent}        → Так как \"{GetKeyValue(line1, secondaryKeyIndex, isNumeric)}\" < \"{GetKeyValue(line2, secondaryKeyIndex, isNumeric)}\"" + 
-                                     $"\n                     добавляем \"{line1}\" из {Path.GetFileName(file1)} в результирующий файл.");
+                    progress?.Report(
+                        $"{indent}        → Так как \"{GetKeyValue(line1, secondaryKeyIndex, isNumeric)}\" < \"{GetKeyValue(line2, secondaryKeyIndex, isNumeric)}\"" +
+                        $"\n                     добавляем \"{line1}\" из {Path.GetFileName(file1)} в результирующий файл.");
                     writer.WriteLine(line1);
                     line1 = reader1.ReadLine();
                 }
                 else
                 {
                     // Выбор элемента из второго файла
-                    progress?.Report($"{indent}        → Так как \"{GetKeyValue(line1, secondaryKeyIndex, isNumeric)}\" > \"{GetKeyValue(line2, secondaryKeyIndex, isNumeric)}\"" +
-                                     $"\n                     добавляем \"{line2}\" из {Path.GetFileName(file2)} в результирующий файл.");
+                    progress?.Report(
+                        $"{indent}        → Так как \"{GetKeyValue(line1, secondaryKeyIndex, isNumeric)}\" > \"{GetKeyValue(line2, secondaryKeyIndex, isNumeric)}\"" +
+                        $"\n                     добавляем \"{line2}\" из {Path.GetFileName(file2)} в результирующий файл.");
                     writer.WriteLine(line2);
                     line2 = reader2.ReadLine();
                 }
@@ -469,7 +619,8 @@ namespace Lab4.Task_2
             // Добавляем оставшиеся элементы из первого файла
             while (line1 != null)
             {
-                progress?.Report($"{indent}    - Добавление оставшегося элемента \"{line1}\" из {Path.GetFileName(file1)} в результирующий файл.");
+                progress?.Report(
+                    $"{indent}    - Добавление оставшегося элемента \"{line1}\" из {Path.GetFileName(file1)} в результирующий файл.");
                 writer.WriteLine(line1);
                 line1 = reader1.ReadLine();
             }
@@ -477,13 +628,15 @@ namespace Lab4.Task_2
             // Добавляем оставшиеся элементы из второго файла
             while (line2 != null)
             {
-                progress?.Report($"{indent}    - Добавление оставшегося элемента \"{line2}\" из {Path.GetFileName(file2)} в результирующий файл.");
+                progress?.Report(
+                    $"{indent}    - Добавление оставшегося элемента \"{line2}\" из {Path.GetFileName(file2)} в результирующий файл.");
                 writer.WriteLine(line2);
                 line2 = reader2.ReadLine();
             }
 
-            progress?.Report($"{indent}• Слияние файлов {Path.GetFileName(file1)} и {Path.GetFileName(file2)} завершено. " +
-                              $"Результат сохранён в {Path.GetFileName(tempFile)}.");
+            progress?.Report(
+                $"{indent}• Слияние файлов {Path.GetFileName(file1)} и {Path.GetFileName(file2)} завершено. " +
+                $"Результат сохранён в {Path.GetFileName(tempFile)}.");
             return tempFile;
         }
 
